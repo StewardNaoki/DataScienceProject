@@ -9,7 +9,7 @@ import torch.nn.functional as F
 import argparse
 import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
-from torch.utils.tensorboard import SummaryWriter
+# from torch.utils.tensorboard import SummaryWriter
 from torchvision import transforms
 import pandas as pd
 import time
@@ -20,19 +20,23 @@ import log_writer as lw
 
 # set to true to one once, then back to false unless you want to change something in your training data.
 CREATE_CSV = True
-PATH_DATA = "./../DATA/"
+DATA_PATH = "./../DATA/"
 CSV_NAME = "train_labels.csv"
 LOG_DIR = "./../log/"
 FC1 = "fc1/"
 BEST_MODELE = "best_model.pt"
 MODEL_PATH = LOG_DIR + FC1 + BEST_MODELE
+LABEL_FILE_PATH = DATA_PATH + "train_label.csv"
+IMAGE_FOLDER_PATH = DATA_PATH + "Images/train/masks/"
+MASK_FOLDER_PATH = DATA_PATH + "Images/train/images/"
 
 # MODELE_LOG_FILE = LOG_DIR + "modele.log"
 # MODELE_TIME = f"model-{int(time.time())}"
 METRICS = "metrics/"
 TENSORBOARD = "tensorboard/"
 DIEZ = "##########"
-tensorboard_writer   = SummaryWriter(log_dir = LOG_DIR+TENSORBOARD)
+EXTENTION = ".jpg"
+# tensorboard_writer   = SummaryWriter(log_dir = LOG_DIR+TENSORBOARD)
 
 
 class ImageDATA(Dataset):
@@ -60,7 +64,7 @@ class ImageDATA(Dataset):
         #     idx = idx.tolist()
         # print(self.data_frame.head())
 
-        img_name = os.path.join(self.image_directory, self.data_frame["img"].iloc[idx, 0])
+        img_name = os.path.join(self.image_directory, self.data_frame["img"].iloc[idx] +EXTENTION)
         print("image name: ", img_name)
         image = cv2.imread(img_name, cv2.IMREAD_GRAYSCALE)
 
@@ -70,7 +74,7 @@ class ImageDATA(Dataset):
         image = cv2.resize(image, (self.IMG_SIZE, self.IMG_SIZE))
 
 
-        mask_name = os.path.join(self.mask_directory, self.data_frame["img"].iloc[idx, 0])
+        mask_name = os.path.join(self.mask_directory, self.data_frame["img"].iloc[idx] +EXTENTION)
         print("mask name: ", mask_name)
         mask = cv2.imread(mask_name, cv2.IMREAD_GRAYSCALE)
 
@@ -348,7 +352,7 @@ def main():
     args = parser.parse_args()
 
     # if args.create_csv:
-    #     g_csv.generate_csv(PATH_DATA + CSV_NAME, args.num_var,
+    #     g_csv.generate_csv(DATA_PATH + CSV_NAME, args.num_var,
     #                        args.num_const, args.num_prob)
 
     valid_ratio = args.valpct  # Going to use 80%/20% split for train/valid
@@ -358,8 +362,10 @@ def main():
     ])
 
     #TODO
-    full_dataset = LP_data(
-        csv_file_name=PATH_DATA + CSV_NAME, transform=data_transforms)
+    full_dataset = ImageDATA(csv_file_path = LABEL_FILE_PATH,
+                            image_directory = IMAGE_FOLDER_PATH,
+                            mask_directory = MASK_FOLDER_PATH ,
+                            transform=data_transforms)
 
     nb_train = int((1.0 - valid_ratio) * len(full_dataset))
     # nb_test = int(valid_ratio * len(full_dataset))
@@ -372,12 +378,12 @@ def main():
 
     train_loader = DataLoader(dataset=train_dataset,
                               batch_size=args.batch,
-                              shuffle=True,
+                              shuffle=False,
                               num_workers=args.num_threads)
 
     test_loader = DataLoader(dataset=test_dataset,
                              batch_size=args.batch,
-                             shuffle=True,
+                             shuffle=False,
                              num_workers=args.num_threads)
 
     for (inputs, targets) in train_loader:
