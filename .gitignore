@@ -133,3 +133,6 @@ dmypy.json
 DATA/*
 *.jpg
 *.log
+*.swo
+*.swp
+tags
