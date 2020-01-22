@@ -378,12 +378,12 @@ def main():
 
     train_loader = DataLoader(dataset=train_dataset,
                               batch_size=args.batch,
-                              shuffle=False,
+                              shuffle=True,
                               num_workers=args.num_threads)
 
     test_loader = DataLoader(dataset=test_dataset,
                              batch_size=args.batch,
-                             shuffle=False,
+                             shuffle=True,
                              num_workers=args.num_threads)
 
     for (inputs, targets) in train_loader:

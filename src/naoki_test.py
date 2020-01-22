@@ -6,7 +6,7 @@ from PIL import Image
 
 import utils
 
-LABEL_FILE_NAME = "../DATA/train_label.csv"
+LABEL_FILE_PATH = "../DATA/train_label.csv"
 TRAIN_ID_FILE_NAME = "../DATA/train_ids.csv"
 MASK_FOLDER_PATH = "../DATA/Images/train/masks/"
 HEIGHT = 720
@@ -15,7 +15,7 @@ LENGTH = 1280
 # HEIGHT = 2
 # LENGTH = 2
 
-df = pd.read_csv(LABEL_FILE_NAME)
+df = pd.read_csv(LABEL_FILE_PATH)
 # df2 = pd.read_csv(TRAIN_ID_FILE_NAME)
 
 print(df.head())
