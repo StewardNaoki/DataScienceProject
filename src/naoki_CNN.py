@@ -21,12 +21,12 @@ import log_writer as lw
 # set to true to one once, then back to false unless you want to change something in your training data.
 CREATE_CSV = True
 DATA_PATH = "./../DATA/"
-CSV_NAME = "train_labels.csv"
+CSV_NAME = "train_label.csv"
 LOG_DIR = "./../log/"
 FC1 = "fc1/"
 BEST_MODELE = "best_model.pt"
 MODEL_PATH = LOG_DIR + FC1 + BEST_MODELE
-LABEL_FILE_PATH = DATA_PATH + "train_label.csv"
+LABEL_FILE_PATH = DATA_PATH + CSV_NAME
 IMAGE_FOLDER_PATH = DATA_PATH + "Images/train/masks/"
 MASK_FOLDER_PATH = DATA_PATH + "Images/train/images/"
 
@@ -157,25 +157,25 @@ class CNN(nn.Module):
         self.conv2 = nn.Conv2d(32, 64, 5, 1, 2)
         self.conv3 = nn.Conv2d(64, 128, 5, 1, 2)
 
-        self.layer1 = nn.Sequential(         # input shape (1, 28, 28)
+        self.layer1 = nn.Sequential(        # input shape (1, 28, 28)
             self.conv1,                     # output shape (16, 28, 28)
             nn.ReLU(),                      # activation
             nn.MaxPool2d(kernel_size=2),    # choose max value in 2x2 area, output shape (16, 14, 14)
         )
-        self.layer2 = nn.Sequential(         # input shape (16, 14, 14)
+        self.layer2 = nn.Sequential(        # input shape (16, 14, 14)
             self.conv2,                     # output shape (32, 14, 14)
             nn.ReLU(),                      # activation
             nn.MaxPool2d(2),                # output shape (32, 7, 7)
         )
-        self.layer3 = nn.Sequential(         # input shape (16, 14, 14)
+        self.layer3 = nn.Sequential(        # input shape (16, 14, 14)
             self.conv3,                     # output shape (32, 14, 14)
             nn.ReLU(),                      # activation
             nn.MaxPool2d(2),                # output shape (32, 7, 7)
         )
 
         
-        self.fc1 = nn.Linear(128*8*8, 512)   # fully connected layer, output 10 classes
-        self.fc2 = nn.Linear(512, 2)   # fully connected layer, output 10 classes
+        self.fc1 = nn.Linear(128*8*8, 512)  # fully connected layer, output 10 classes
+        self.fc2 = nn.Linear(512, 2)        # fully connected layer, output 10 classes
 
     def penalty(self):
         return self.l2_reg * (self.conv1.weight.norm(2) + self.conv2.weight.norm(2) + self.conv3.weight.norm(2) + self.fc1.weight.norm(2) + self.fc2.weight.norm(2))
