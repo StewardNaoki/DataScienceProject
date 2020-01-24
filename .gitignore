@@ -133,6 +133,9 @@ dmypy.json
 
 #Perso
 DATA/*
+*.jpg
+*.log
 *.swo
 *.swp
 tags
+log
