@@ -27,15 +27,16 @@ FC1 = "fc1/"
 BEST_MODELE = "best_model.pt"
 MODEL_PATH = LOG_DIR + FC1 + BEST_MODELE
 LABEL_FILE_PATH = DATA_PATH + "train_label.csv"
-IMAGE_FOLDER_PATH = DATA_PATH + "Images/train/masks/"
-MASK_FOLDER_PATH = DATA_PATH + "Images/train/images/"
+IMAGE_FOLDER_PATH = DATA_PATH + "Images/train/images/"
+MASK_FOLDER_PATH = DATA_PATH + "Images/train/masks/"
 
 # MODELE_LOG_FILE = LOG_DIR + "modele.log"
 # MODELE_TIME = f"model-{int(time.time())}"
 METRICS = "metrics/"
 TENSORBOARD = "tensorboard/"
 DIEZ = "##########"
-EXTENTION = ".jpg"
+EXTENTION_PNG = ".png"
+EXTENTION_JPG = ".jpg"
 # tensorboard_writer   = SummaryWriter(log_dir = LOG_DIR+TENSORBOARD)
 
 
@@ -50,7 +51,7 @@ class ImageDATA(Dataset):
             transform (callable, optional): Optional transform to be applied
                 on a sample.
         """
-        self.data_frame = pd.read_csv(csv_file_path)
+        self.data_frame = pd.read_csv(csv_file_path).head(10)
         self.transform = transform
         self.image_directory = image_directory
         self.mask_directory = mask_directory
@@ -64,31 +65,33 @@ class ImageDATA(Dataset):
         #     idx = idx.tolist()
         # print(self.data_frame.head())
 
-        img_name = os.path.join(self.image_directory, self.data_frame["img"].iloc[idx] +EXTENTION)
+        img_name = os.path.join(self.image_directory, self.data_frame["img"].iloc[idx] + EXTENTION_JPG)
         print("image name: ", img_name)
         image = cv2.imread(img_name, cv2.IMREAD_GRAYSCALE)
 
         if(image is None):
             print("This image is None: image name: ",img_name)
             assert (not image is None)
+        # cv2.imshow("Image", image)
+        # cv2.waitKey(0)
         image = cv2.resize(image, (self.IMG_SIZE, self.IMG_SIZE))
 
-
-        mask_name = os.path.join(self.mask_directory, self.data_frame["img"].iloc[idx] +EXTENTION)
+        mask_name = os.path.join(self.mask_directory, self.data_frame["img"].iloc[idx] + EXTENTION_PNG)
         print("mask name: ", mask_name)
         mask = cv2.imread(mask_name, cv2.IMREAD_GRAYSCALE)
+        # cv2.imshow("Mask", mask)
+        # cv2.waitKey(0)
 
-        if(X is None):
+        if(mask is None):
             print("This image is None: image name: ",mask_name)
             assert (not mask_name is None)
         mask = cv2.resize(mask, (self.IMG_SIZE, self.IMG_SIZE))
-
 
         sample = {'image': np.array(image), 'mask': np.array(mask)}
 
         if self.transform:
             sample = self.transform(sample)
-        
+
         # return sample
         return (sample['image'], sample['mask'])
 
@@ -97,28 +100,22 @@ class ToTensor(object):
     """Convert ndarrays in sample to Tensors."""
 
     def __call__(self, sample):
-        image, Y = sample['image'], sample['mask']
+        image, mask = sample['image'], sample['mask']
 
         # swap color axis because
         # numpy image: H x W x C
         # torch image: C X H X W
-        # print(type(image.shape))
-        # print(len(image.shape))
-        # print(Y)
 
-        # print("image1: ",image)
-        # print(image.shape)
-
-        
         if len(image.shape) == 3:
             print(image.shape)
             image = image.transpose((2, 0, 1))
+            mask = mask.transpose((2, 0, 1))
         elif len(image.shape) == 2:
-            image = np.array([image])
-
+            mask = np.reshape(mask, (1, mask.shape[0], mask.shape[1]))
+            image = np.reshape(image, (1, image.shape[0], image.shape[1]))
 
         return {'image': torch.from_numpy(image).float(),
-                'mask': torch.from_numpy(Y).float()}
+                'mask': torch.from_numpy(mask).float()}
 
 
 class Normalize(object):
@@ -358,14 +355,14 @@ def main():
     valid_ratio = args.valpct  # Going to use 80%/20% split for train/valid
 
     data_transforms = transforms.Compose([
-        ToTensor()
+        ToTensor(), Normalize()
     ])
 
-    #TODO
+    # TODO
     full_dataset = ImageDATA(csv_file_path = LABEL_FILE_PATH,
-                            image_directory = IMAGE_FOLDER_PATH,
-                            mask_directory = MASK_FOLDER_PATH ,
-                            transform=data_transforms)
+                             image_directory = IMAGE_FOLDER_PATH,
+                             mask_directory = MASK_FOLDER_PATH ,
+                             transform=data_transforms)
 
     nb_train = int((1.0 - valid_ratio) * len(full_dataset))
     # nb_test = int(valid_ratio * len(full_dataset))
@@ -386,8 +383,12 @@ def main():
                              shuffle=True,
                              num_workers=args.num_threads)
 
+    i = 0
     for (inputs, targets) in train_loader:
-        print("input:\n",inputs)
+        if i > 10:
+            break
+        i += 1
+        print("input:\n", inputs)
         print("target:\n", targets)
 
     # #TODO params
