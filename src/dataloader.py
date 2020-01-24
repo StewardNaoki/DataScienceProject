@@ -60,7 +60,7 @@ class ImageDATA(Dataset):
 
         if(mask is None):
             print("This image is None: image name: ",mask_name)
-            assert (not mask_name is None)
+            assert (not mask is None)
         mask = cv2.resize(mask, (self.IMG_SIZE, self.IMG_SIZE))
 
         sample = {'image': np.array(image), 'mask': np.array(mask)}

@@ -11,10 +11,7 @@ import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
 # from torch.utils.tensorboard import SummaryWriter
 from torchvision import transforms
-import pandas as pd
 import time
-import sys
-import csv
 
 import log_writer as lw
 import Network as nw
@@ -56,13 +53,6 @@ def main():
                         help="create or not csv file (default: False)")
     parser.add_argument("--l2_reg", type=int, default=0.001,
                         help="L2 regularisation (default: 0.001)")
-
-    # parser.add_argument("--num_var", type=int, default=5,
-    #                     help="Number of variables (default: 5)")
-    # parser.add_argument("--num_const", type=int, default=4,
-    #                     help="number of constrains (default: 4)")
-    # parser.add_argument("--num_prob", type=int, default=10,
-    #                     help="number of problems to generate (default: 10)")
 
     args = parser.parse_args()
 

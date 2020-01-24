@@ -14,30 +14,9 @@ from torchvision import transforms
 import pandas as pd
 import time
 import sys
-import csv
 
 import log_writer as lw
 
-# set to true to one once, then back to false unless you want to change something in your training data.
-CREATE_CSV = True
-DATA_PATH = "./../DATA/"
-CSV_NAME = "train_label.csv"
-LOG_DIR = "./../log/"
-FC1 = "fc1/"
-BEST_MODELE = "best_model.pt"
-MODEL_PATH = LOG_DIR + FC1 + BEST_MODELE
-LABEL_FILE_PATH = DATA_PATH + CSV_NAME
-IMAGE_FOLDER_PATH = DATA_PATH + "Images/train/masks/"
-MASK_FOLDER_PATH = DATA_PATH + "Images/train/images/"
-
-# MODELE_LOG_FILE = LOG_DIR + "modele.log"
-# MODELE_TIME = f"model-{int(time.time())}"
-METRICS = "metrics/"
-TENSORBOARD = "tensorboard/"
-DIEZ = "##########"
-EXTENTION_PNG = ".png"
-EXTENTION_JPG = ".jpg"
-# tensorboard_writer   = SummaryWriter(log_dir = LOG_DIR+TENSORBOARD)
 
 
 
@@ -128,11 +107,7 @@ def train(model, loader, f_loss, optimizer, device):
 
     N = 0
     tot_loss, correct = 0.0, 0.0
-    # with tqdm(total=len(loader)) as pbar:
     for i, (inputs, targets) in enumerate(loader):
-        # pbar.update(1)
-        # pbar.set_description("Training step {}".format(i))
-        # print("****", inputs.shape)
         inputs, targets = inputs.to(device), targets.to(device)
         # print("***",inputs.shape)
 
@@ -181,8 +156,6 @@ def test(model, loader, f_loss, device, final_test=False):
         model.eval()
         N = 0
         tot_loss, correct = 0.0, 0.0
-        # with open(MODELE_LOG_FILE, "a") as f:
-        #with tqdm(total=len(loader)) as pbar:
         for i, (inputs, targets) in enumerate(loader):
             # pbar.update(1)
             # pbar.set_description("Testing step {}".format(i))
