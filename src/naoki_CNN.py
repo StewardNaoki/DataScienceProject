@@ -92,7 +92,6 @@ class ImageDATA(Dataset):
         if self.transform:
             sample = self.transform(sample)
 
-        # return sample
         return (sample['image'], sample['mask'])
 
 
