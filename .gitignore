@@ -1,8 +1,7 @@
 #Perso
-DATA/*.csv
 DATA/supplementary.zip
 
-
+*.csv
 *.jpg
 *.png
 .DS_Store
@@ -11,6 +10,7 @@ DATA/supplementary.zip
 *.swp
 tags
 log
+./Data
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

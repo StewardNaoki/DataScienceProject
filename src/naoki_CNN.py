@@ -21,12 +21,12 @@ import log_writer as lw
 # set to true to one once, then back to false unless you want to change something in your training data.
 CREATE_CSV = True
 DATA_PATH = "./../DATA/"
-CSV_NAME = "train_labels.csv"
+CSV_NAME = "train_label.csv"
 LOG_DIR = "./../log/"
 FC1 = "fc1/"
 BEST_MODELE = "best_model.pt"
 MODEL_PATH = LOG_DIR + FC1 + BEST_MODELE
-LABEL_FILE_PATH = DATA_PATH + "train_label.csv"
+LABEL_FILE_PATH = DATA_PATH + CSV_NAME
 IMAGE_FOLDER_PATH = DATA_PATH + "Images/train/images/"
 MASK_FOLDER_PATH = DATA_PATH + "Images/train/masks/"
 
@@ -153,25 +153,25 @@ class CNN(nn.Module):
         self.conv2 = nn.Conv2d(32, 64, 5, 1, 2)
         self.conv3 = nn.Conv2d(64, 128, 5, 1, 2)
 
-        self.layer1 = nn.Sequential(         # input shape (1, 28, 28)
+        self.layer1 = nn.Sequential(        # input shape (1, 28, 28)
             self.conv1,                     # output shape (16, 28, 28)
             nn.ReLU(),                      # activation
             nn.MaxPool2d(kernel_size=2),    # choose max value in 2x2 area, output shape (16, 14, 14)
         )
-        self.layer2 = nn.Sequential(         # input shape (16, 14, 14)
+        self.layer2 = nn.Sequential(        # input shape (16, 14, 14)
             self.conv2,                     # output shape (32, 14, 14)
             nn.ReLU(),                      # activation
             nn.MaxPool2d(2),                # output shape (32, 7, 7)
         )
-        self.layer3 = nn.Sequential(         # input shape (16, 14, 14)
+        self.layer3 = nn.Sequential(        # input shape (16, 14, 14)
             self.conv3,                     # output shape (32, 14, 14)
             nn.ReLU(),                      # activation
             nn.MaxPool2d(2),                # output shape (32, 7, 7)
         )
 
         
-        self.fc1 = nn.Linear(128*8*8, 512)   # fully connected layer, output 10 classes
-        self.fc2 = nn.Linear(512, 2)   # fully connected layer, output 10 classes
+        self.fc1 = nn.Linear(128*8*8, 512)  # fully connected layer, output 10 classes
+        self.fc2 = nn.Linear(512, 2)        # fully connected layer, output 10 classes
 
     def penalty(self):
         return self.l2_reg * (self.conv1.weight.norm(2) + self.conv2.weight.norm(2) + self.conv3.weight.norm(2) + self.fc1.weight.norm(2) + self.fc2.weight.norm(2))
@@ -185,6 +185,7 @@ class CNN(nn.Module):
         output = self.fc2(x)
         # return output, x    # return x for visualization
         return F.softmax(output, dim = 1)
+
 
 
 def train(model, loader, f_loss, optimizer, device):
@@ -211,32 +212,32 @@ def train(model, loader, f_loss, optimizer, device):
 
     N = 0
     tot_loss, correct = 0.0, 0.0
-    with tqdm(total=len(loader)) as pbar:
-        for i, (inputs, targets) in enumerate(loader):
-            pbar.update(1)
-            pbar.set_description("Training step {}".format(i))
-            # print("****", inputs.shape)
-            inputs, targets = inputs.to(device), targets.to(device)
-            # print("***",inputs.shape)
+    # with tqdm(total=len(loader)) as pbar:
+    for i, (inputs, targets) in enumerate(loader):
+        # pbar.update(1)
+        # pbar.set_description("Training step {}".format(i))
+        # print("****", inputs.shape)
+        inputs, targets = inputs.to(device), targets.to(device)
+        # print("***",inputs.shape)
 
-            # Compute the forward pass through the network up to the loss
-            outputs = model(inputs)
+        # Compute the forward pass through the network up to the loss
+        outputs = model(inputs)
 
-            loss = f_loss(outputs, targets)
-            # print("Loss: ", loss)
-            N += inputs.shape[0]
-            tot_loss += inputs.shape[0] * f_loss(outputs, targets).item()
+        loss = f_loss(outputs, targets)
+        # print("Loss: ", loss)
+        N += inputs.shape[0]
+        tot_loss += inputs.shape[0] * f_loss(outputs, targets).item()
 
-            # print("Output: ", outputs)
-            predicted_targets = outputs
+        # print("Output: ", outputs)
+        predicted_targets = outputs
 
-            correct += (predicted_targets == targets).sum().item()
+        correct += (predicted_targets == targets).sum().item()
 
-            optimizer.zero_grad()
-            # model.zero_grad()
-            loss.backward()
-            # model.penalty().backward()
-            optimizer.step()
+        optimizer.zero_grad()
+        # model.zero_grad()
+        loss.backward()
+        # model.penalty().backward()
+        optimizer.step()
     return tot_loss/N, correct/N
 
 
@@ -249,7 +250,7 @@ def test(model, loader, f_loss, device, final_test=False):
         model     -- A torch.nn.Module object
         loader    -- A torch.utils.data.DataLoader
         f_loss    -- The loss function, i.e. a loss Module
-        device    -- The device to use for computation 
+        device    -- The device to use for computation
 
     Returns :
 
@@ -265,39 +266,39 @@ def test(model, loader, f_loss, device, final_test=False):
         N = 0
         tot_loss, correct = 0.0, 0.0
         # with open(MODELE_LOG_FILE, "a") as f:
-        with tqdm(total=len(loader)) as pbar:
-            for i, (inputs, targets) in enumerate(loader):
-                pbar.update(1)
-                pbar.set_description("Testing step {}".format(i))
-                # We got a minibatch from the loader within inputs and targets
-                # With a mini batch size of 128, we have the following shapes
-                #    inputs is of shape (128, 1, 28, 28)
-                #    targets is of shape (128)
+        #with tqdm(total=len(loader)) as pbar:
+        for i, (inputs, targets) in enumerate(loader):
+            # pbar.update(1)
+            # pbar.set_description("Testing step {}".format(i))
+            # We got a minibatch from the loader within inputs and targets
+            # With a mini batch size of 128, we have the following shapes
+            #    inputs is of shape (128, 1, 28, 28)
+            #    targets is of shape (128)
 
-                # We need to copy the data on the GPU if we use one
-                inputs, targets = inputs.to(device), targets.to(device)
+            # We need to copy the data on the GPU if we use one
+            inputs, targets = inputs.to(device), targets.to(device)
 
-                # Compute the forward pass, i.e. the scores for each input image
-                outputs = model(inputs)
+            # Compute the forward pass, i.e. the scores for each input image
+            outputs = model(inputs)
 
-                # We accumulate the exact number of processed samples
-                N += inputs.shape[0]
+            # We accumulate the exact number of processed samples
+            N += inputs.shape[0]
 
-                # We accumulate the loss considering
-                # The multipliation by inputs.shape[0] is due to the fact
-                # that our loss criterion is averaging over its samples
-                tot_loss += inputs.shape[0] * f_loss(outputs, targets).item()
+            # We accumulate the loss considering
+            # The multipliation by inputs.shape[0] is due to the fact
+            # that our loss criterion is averaging over its samples
+            tot_loss += inputs.shape[0] * f_loss(outputs, targets).item()
 
-                # For the accuracy, we compute the labels for each input image
-                # Be carefull, the model is outputing scores and not the probabilities
-                # But given the softmax is not altering the rank of its input scores
-                # we can compute the label by argmaxing directly the scores
-                predicted_targets = outputs
-                correct += (predicted_targets == targets).sum().item()
+            # For the accuracy, we compute the labels for each input image
+            # Be carefull, the model is outputing scores and not the probabilities
+            # But given the softmax is not altering the rank of its input scores
+            # we can compute the label by argmaxing directly the scores
+            predicted_targets = outputs
+            correct += (predicted_targets == targets).sum().item()
 
-                if final_test:
-                    print("targets:\n", targets[0])
-                    print("predicted targets:\n", outputs[0])
+            if final_test:
+                print("targets:\n", targets[0])
+                print("predicted targets:\n", outputs[0])
 
     return tot_loss/N, correct/N
 
