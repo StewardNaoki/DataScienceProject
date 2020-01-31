@@ -62,7 +62,7 @@ class CNN(nn.Module):
             nn.MaxPool2d(2),                # output shape (32, 7, 7)
         )
 
-        
+
         self.fc1 = nn.Linear(128*8*8, 512)  # fully connected layer, output 10 classes
         self.fc2 = nn.Linear(512, 2)        # fully connected layer, output 10 classes
 
@@ -78,6 +78,54 @@ class CNN(nn.Module):
         output = self.fc2(x)
         # return output, x    # return x for visualization
         return F.softmax(output, dim = 1)
+
+
+
+class Autoencoder(nn.Module):
+    def __init__(self):
+        super(Autoencoder,num_block,self).__init__()
+
+        self.num_channel = 3
+
+    def encoder(x, filters = 44, num_block = 3, kernel_size = 3):
+
+        self.num_channel = 3
+
+        for i in range(num_block):
+
+            eval("self.encoder{i}".format(i)) = nn.Sequential(
+            nn.Conv2d(num_channel, fileters * 2**i , kernel_size= kernel_size),
+            nn.ReLU(),
+            nn.Conv2d(fileters * 2**i, fileters * 2**i , kernel_size= kernel_size),
+            nn.ReLU(),
+            nn.MaxPool2d(2))
+            self.num_channel = fileters * 2**i
+            x = eval("self.encoder{i}(x)".format(i))
+
+        return x
+
+    def decoder(x, filters = 44, num_block = 3, kernel_size = 3):
+
+        # self.num_channel = 3
+
+        for i in reversed(range(num_block)):
+
+            eval("self.decoder{i}".format(i)) = nn.Sequential(
+            nn.Conv2d(num_channel, fileters * 2**i , kernel_size= kernel_size),
+            nn.ReLU(),
+            nn.Conv2d(fileters * 2**i, fileters * 2**i , kernel_size= kernel_size),
+            nn.ReLU(),
+            nn.MaxPool2d(2))
+            self.num_channel = fileters * 2**i
+            x = eval("self.decoder{i}(x)".format(i))
+
+        return x
+
+
+    def forward(self,x):
+        x = encoder(x)
+        x = decoder(x)
+        return x
 
 
 def train(model, loader, f_loss, optimizer, device):

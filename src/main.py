@@ -106,9 +106,8 @@ def main():
 
     # #TODO params
     # num_param = args.num_var + args.num_const + (args.num_var*args.num_const)
-    # model = FullyConnectedRegularized(
-    #     l2_reg=args.l2_reg, num_param=num_param, num_var=args.num_var)
-    # print("Network architechture:\n", model)
+    model = Autoencoder( num_channel = 3)
+    print("Network architechture:\n", model)
 
     use_gpu = torch.cuda.is_available()
     if use_gpu:
