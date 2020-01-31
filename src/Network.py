@@ -44,22 +44,26 @@ class CNN(nn.Module):
             nn.MaxPool2d(2),                # output shape (32, 7, 7)
         )
 
-
         self.fc1 = nn.Linear(128*8*8, 512)  # fully connected layer, output 10 classes
         self.fc2 = nn.Linear(512, 2)        # fully connected layer, output 10 classes
 
     # def penalty(self):
-    #     return self.l2_reg * (self.conv1.weight.norm(2) + self.conv2.weight.norm(2) + self.conv3.weight.norm(2) + self.fc1.weight.norm(2) + self.fc2.weight.norm(2))
+    #     return (self.l2_reg * (self.conv1.weight.norm(2)
+    #                            + self.conv2.weight.norm(2)
+    #                            + self.conv3.weight.norm(2)
+    #                            + self.fc1.weight.norm(2)
+    #                            + self.fc2.weight.norm(2))
+    #             )
 
     def forward(self, x):
         x = self.layer1(x)
         x = self.layer2(x)
         x = self.layer3(x)
-        x = x.view(x.size(0), -1)           # flatten the output of conv2 to (batch_size, 32 * 7 * 7)
+        x = x.view(x.size(0), -1)  # flatten the output of conv2 to (batch_size, 32 * 7 * 7)
         x = self.fc1(x)
         output = self.fc2(x)
         # return output, x    # return x for visualization
-        return F.softmax(output, dim = 1)
+        return F.softmax(output, dim=1)
 
 
 class Autoencoder(nn.Module):
@@ -67,6 +71,7 @@ class Autoencoder(nn.Module):
         super(Autoencoder, self).__init__()
         self.num_block = num_block
         self.num_channel = 3
+        self.skip = []
 
         filters = 44
         kernel_size = 3
@@ -85,31 +90,37 @@ class Autoencoder(nn.Module):
                 nn.ReLU(),
                 ))
         for i in reversed(range(num_block)):
-            setattr(self, 'decoder{}'.format(i), nn.Sequential(
+            setattr(self, 'decoder1{}'.format(i), nn.Sequential(
                 nn.Conv2d(self.num_channel, filters * 2**i, kernel_size=kernel_size),
                 nn.ReLU(),
+                ))
+            setattr(self, 'decoder2{}'.format(i), nn.Sequential(
                 nn.Conv2d(filters * 2**i, filters * 2**i, kernel_size=kernel_size),
                 nn.ReLU(),
                 nn.MaxPool2d(2)))
 
     def encoder(self, x, filters=44, num_block=3, kernel_size=3):
         self.num_channel = 3
+        self.skip = []
         for i in range(num_block):
             self.num_channel = filters * 2**i
-            x = eval("self.encoder{i}(x)".format(i))
+            x = eval("self.encoder{}(x)".format(i))
+            self.skip.append(x)
 
         return x
 
     def bottleneck(self, x, filters=44, depth=6, kernel_size=3):
         for i in range(depth):
-            x = eval("self.bottleneck{i}(x)".format(i))
+            x = eval("self.bottleneck{}(x)".format(i))
         return x
 
     def decoder(self, x, filters=44, num_block=3, kernel_size=3):
         for i in reversed(range(num_block)):
+            x = nn.Upsample(scale_factor=2, mode='nearest')(x)
+            x = eval("self.decoder1{}(x)".format(i))
+            x = torch.cat(self.skip, x)
             self.num_channel = filters * 2**i
-            x = eval("self.decoder{i}(x)".format(i))
-
+            x = eval("self.decoder2{}(x)".format(i))
         return x
 
     def forward(self, x):
@@ -239,13 +250,10 @@ class ModelCheckpoint:
         if (self.min_loss is None) or (loss < self.min_loss):
             print("Saving a better model to ", self.filepath)
             torch.save(self.model.state_dict(), self.filepath)
-            #torch.save(self.model, self.filepath)
+            # torch.save(self.model, self.filepath)
             self.min_loss = loss
 
 
 def progress(loss, acc):
     print(' Training   : Loss : {:2.4f}, Acc : {:2.4f}\r'.format(loss, acc))
     sys.stdout.flush()
-
-
-

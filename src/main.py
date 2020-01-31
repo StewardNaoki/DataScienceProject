@@ -1,6 +1,4 @@
 import os
-import cv2
-import numpy as np
 from tqdm import tqdm
 
 import torch
@@ -25,8 +23,8 @@ FC1 = "fc1/"
 BEST_MODELE = "best_model.pt"
 MODEL_PATH = LOG_DIR + FC1 + BEST_MODELE
 LABEL_FILE_PATH = DATA_PATH + CSV_NAME
-IMAGE_FOLDER_PATH = DATA_PATH + "Images/train/masks/"
-MASK_FOLDER_PATH = DATA_PATH + "Images/train/images/"
+IMAGE_FOLDER_PATH = DATA_PATH + "Images/train/images/"
+MASK_FOLDER_PATH = DATA_PATH + "Images/train/masks/"
 
 # MODELE_LOG_FILE = LOG_DIR + "modele.log"
 # MODELE_TIME = f"model-{int(time.time())}"
@@ -35,7 +33,6 @@ TENSORBOARD = "tensorboard/"
 DIEZ = "##########"
 EXTENTION_PNG = ".png"
 EXTENTION_JPG = ".jpg"
-
 
 
 def main():
@@ -69,13 +66,12 @@ def main():
     ])
 
     # TODO
-    full_dataset = dl.ImageDATA(csv_file_path = LABEL_FILE_PATH,
-                                image_directory = IMAGE_FOLDER_PATH,
-                                mask_directory = MASK_FOLDER_PATH ,
+    full_dataset = dl.ImageDATA(csv_file_path=LABEL_FILE_PATH,
+                                image_directory=IMAGE_FOLDER_PATH,
+                                mask_directory=MASK_FOLDER_PATH,
                                 transform=data_transforms)
 
     nb_train = int((1.0 - valid_ratio) * len(full_dataset))
-    # nb_test = int(valid_ratio * len(full_dataset))
     nb_test = len(full_dataset) - nb_train
     print("Size of full data set: ", len(full_dataset))
     print("Size of training data: ", nb_train)
@@ -83,15 +79,15 @@ def main():
     train_dataset, test_dataset = torch.utils.data.dataset.random_split(
         full_dataset, [nb_train, nb_test])
 
-    # train_loader = DataLoader(dataset=train_dataset,
-    #                           batch_size=args.batch,
-    #                           shuffle=True,
-    #                           num_workers=args.num_threads)
+    train_loader = DataLoader(dataset=train_dataset,
+                              batch_size=args.batch,
+                              shuffle=True,
+                              num_workers=args.num_threads)
 
-    # test_loader = DataLoader(dataset=test_dataset,
-    #                          batch_size=args.batch,
-    #                          shuffle=True,
-    #                          num_workers=args.num_threads)
+    test_loader = DataLoader(dataset=test_dataset,
+                             batch_size=args.batch,
+                             shuffle=True,
+                             num_workers=args.num_threads)
 
     # i = 0
     # for (inputs, targets) in train_loader:
@@ -106,6 +102,9 @@ def main():
     model = nw.Autoencoder(num_block=3)
     print("Network architechture:\n", model)
 
+    for (inputs, targets) in enumerate(train_loader):
+        model.forward(inputs)
+
     use_gpu = torch.cuda.is_available()
     if use_gpu:
         device = torch.device('cuda')
@@ -114,7 +113,7 @@ def main():
 
     model.to(device)
 
-    # # f_loss = torch.nn.CrossEntropyLoss() #TODO
+    # # f_loss = torch.nn.CrossEntropyLoss() # TODO
     # f_loss = nn.MSELoss()
     # optimizer = torch.optim.Adam(model.parameters())
 
@@ -131,9 +130,15 @@ def main():
     #     tensorboard_writer = SummaryWriter(
     #         log_dir=run_dir_path, filename_suffix=".log")
 
-    #     #write short description of the run
+    #     # write short description of the run
     #     run_desc = "Epoch{}Reg{}Var{}Const{}CLoss{}Dlayer{}Alpha{}".format(
-    #         args.num_epoch, args.l2_reg, args.num_var, args.num_const, args.custom_loss, args.num_deep_layer, args.alpha)
+    #         args.num_epoch,
+    #         args.l2_reg,
+    #         args.num_var,
+    #         args.num_const,
+    #         args.custom_loss,
+    #         args.num_deep_layer,
+    #         args.alpha)
     #     log_file_path =  LOG_DIR + "Run{}".format(num_run) + run_desc + ".log"
 
     # log_file_path = lw.generate_unique_logpath(LOG_DIR, "Linear")

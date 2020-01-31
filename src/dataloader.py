@@ -47,9 +47,7 @@ class ImageDATA(Dataset):
         print("image name: ", img_name)
         image = cv2.imread(img_name, cv2.IMREAD_GRAYSCALE)
 
-        if(image is None):
-            print("This image is None: image name: ", img_name)
-            assert (not image is None)
+        assert (image is not None), "This image is None: image name: {}".format(img_name)
         # cv2.imshow("Image", image)
         # cv2.waitKey(0)
         image = cv2.resize(image, (self.IMG_SIZE, self.IMG_SIZE))
@@ -61,9 +59,7 @@ class ImageDATA(Dataset):
         # cv2.imshow("Mask", mask)
         # cv2.waitKey(0)
 
-        if(mask is None):
-            print("This image is None: image name: ", mask_name)
-            assert (not mask is None)
+        assert (mask is not None), "This image is None: image name: {}".format(mask_name)
         mask = cv2.resize(mask, (self.IMG_SIZE, self.IMG_SIZE))
 
         sample = {'image': np.array(image), 'mask': np.array(mask)}
