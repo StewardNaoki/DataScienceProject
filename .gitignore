@@ -1,3 +1,15 @@
+#Perso
+DATA/supplementary.zip
+
+*.csv
+*.jpg
+*.png
+.DS_Store
+*.log
+*.swo
+*.swp
+tags
+log
 ./Data
 
 # Byte-compiled / optimized / DLL files
@@ -129,13 +141,3 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-
-
-#Perso
-DATA/*
-*.jpg
-*.log
-*.swo
-*.swp
-tags
-log
