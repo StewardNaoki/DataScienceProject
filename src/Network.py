@@ -20,9 +20,7 @@ import log_writer as lw
 
 
 
-
 # class CrossEntropyOneHot(object):
-
 
 #     def __call__(self, sample):
 #         _, labels = sample['Y'].max(dim=0)
@@ -68,8 +66,8 @@ class CNN(nn.Module):
         self.fc1 = nn.Linear(128*8*8, 512)  # fully connected layer, output 10 classes
         self.fc2 = nn.Linear(512, 2)        # fully connected layer, output 10 classes
 
-    def penalty(self):
-        return self.l2_reg * (self.conv1.weight.norm(2) + self.conv2.weight.norm(2) + self.conv3.weight.norm(2) + self.fc1.weight.norm(2) + self.fc2.weight.norm(2))
+    # def penalty(self):
+    #     return self.l2_reg * (self.conv1.weight.norm(2) + self.conv2.weight.norm(2) + self.conv3.weight.norm(2) + self.fc1.weight.norm(2) + self.fc2.weight.norm(2))
 
     def forward(self, x):
         x = self.layer1(x)
@@ -80,7 +78,6 @@ class CNN(nn.Module):
         output = self.fc2(x)
         # return output, x    # return x for visualization
         return F.softmax(output, dim = 1)
-
 
 
 def train(model, loader, f_loss, optimizer, device):
@@ -185,9 +182,9 @@ def test(model, loader, f_loss, device, final_test=False):
             predicted_targets = outputs
             correct += (predicted_targets == targets).sum().item()
 
-            if final_test:
-                print("targets:\n", targets[0])
-                print("predicted targets:\n", outputs[0])
+            # if final_test:
+            #     print("targets:\n", targets[0])
+            #     print("predicted targets:\n", outputs[0])
 
     return tot_loss/N, correct/N
 

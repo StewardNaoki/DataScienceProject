@@ -51,6 +51,8 @@ def main():
                         help="number of thread used (default: 1)")
     parser.add_argument("--create_csv", type=bool, default=False,
                         help="create or not csv file (default: False)")
+    parser.add_argument("--log", default=False, action='store_true',
+                        help="Write log or not (default: False)")
     parser.add_argument("--l2_reg", type=int, default=0.001,
                         help="L2 regularisation (default: 0.001)")
 
@@ -99,19 +101,22 @@ def main():
         print("input:\n", inputs)
         print("target:\n", targets)
 
+
+    
+
     # #TODO params
     # num_param = args.num_var + args.num_const + (args.num_var*args.num_const)
     # model = FullyConnectedRegularized(
     #     l2_reg=args.l2_reg, num_param=num_param, num_var=args.num_var)
     # print("Network architechture:\n", model)
 
-    # use_gpu = torch.cuda.is_available()
-    # if use_gpu:
-    #     device = torch.device('cuda')
-    # else:
-    #     device = torch.device('cpu')
+    use_gpu = torch.cuda.is_available()
+    if use_gpu:
+        device = torch.device('cuda')
+    else:
+        device = torch.device('cpu')
 
-    # model.to(device)
+    model.to(device)
 
     # # f_loss = torch.nn.CrossEntropyLoss() #TODO
     # f_loss = nn.MSELoss()
@@ -121,6 +126,19 @@ def main():
     # if not os.path.exists(top_logdir):
     #     os.mkdir(top_logdir)
     # model_checkpoint = ModelCheckpoint(top_logdir + BEST_MODELE, model)
+
+    # if args.log:
+    #     print("Writing log")
+    #     #generate unique folder for new run
+    #     run_dir_path, num_run = lw.generate_unique_run_dir(LOG_DIR,"run")
+
+    #     tensorboard_writer = SummaryWriter(
+    #         log_dir=run_dir_path, filename_suffix=".log")
+
+    #     #write short description of the run
+    #     run_desc = "Epoch{}Reg{}Var{}Const{}CLoss{}Dlayer{}Alpha{}".format(
+    #         args.num_epoch, args.l2_reg, args.num_var, args.num_const, args.custom_loss, args.num_deep_layer, args.alpha)
+    #     log_file_path =  LOG_DIR + "Run{}".format(num_run) + run_desc + ".log"
 
     # log_file_path = lw.generate_unique_logpath(LOG_DIR, "Linear")
 

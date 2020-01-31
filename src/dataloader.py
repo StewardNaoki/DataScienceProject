@@ -15,6 +15,8 @@ from torch.utils.data import Dataset, DataLoader
 DIEZ = "##########"
 EXTENTION_PNG = ".png"
 EXTENTION_JPG = ".jpg"
+s
+
 
 class ImageDATA(Dataset):
     """Face Landmarks dataset."""
@@ -41,25 +43,27 @@ class ImageDATA(Dataset):
         #     idx = idx.tolist()
         # print(self.data_frame.head())
 
-        img_name = os.path.join(self.image_directory, self.data_frame["img"].iloc[idx] + EXTENTION_JPG)
+        img_name = os.path.join(
+            self.image_directory, self.data_frame["img"].iloc[idx] + EXTENTION_JPG)
         print("image name: ", img_name)
         image = cv2.imread(img_name, cv2.IMREAD_GRAYSCALE)
 
         if(image is None):
-            print("This image is None: image name: ",img_name)
+            print("This image is None: image name: ", img_name)
             assert (not image is None)
         # cv2.imshow("Image", image)
         # cv2.waitKey(0)
         image = cv2.resize(image, (self.IMG_SIZE, self.IMG_SIZE))
 
-        mask_name = os.path.join(self.mask_directory, self.data_frame["img"].iloc[idx] + EXTENTION_PNG)
+        mask_name = os.path.join(
+            self.mask_directory, self.data_frame["img"].iloc[idx] + EXTENTION_PNG)
         print("mask name: ", mask_name)
         mask = cv2.imread(mask_name, cv2.IMREAD_GRAYSCALE)
         # cv2.imshow("Mask", mask)
         # cv2.waitKey(0)
 
         if(mask is None):
-            print("This image is None: image name: ",mask_name)
+            print("This image is None: image name: ", mask_name)
             assert (not mask is None)
         mask = cv2.resize(mask, (self.IMG_SIZE, self.IMG_SIZE))
 
@@ -100,5 +104,5 @@ class Normalize(object):
         image = sample['image']
 
         # landmarks = landmarks.transpose((2, 0, 1))
-        return {'image': (image/255) -0.5,
+        return {'image': (image/255) - 0.5,
                 'mask': sample['mask']}
