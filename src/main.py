@@ -70,9 +70,9 @@ def main():
 
     # TODO
     full_dataset = dl.ImageDATA(csv_file_path = LABEL_FILE_PATH,
-                             image_directory = IMAGE_FOLDER_PATH,
-                             mask_directory = MASK_FOLDER_PATH ,
-                             transform=data_transforms)
+                                image_directory = IMAGE_FOLDER_PATH,
+                                mask_directory = MASK_FOLDER_PATH ,
+                                transform=data_transforms)
 
     nb_train = int((1.0 - valid_ratio) * len(full_dataset))
     # nb_test = int(valid_ratio * len(full_dataset))
@@ -83,30 +83,27 @@ def main():
     train_dataset, test_dataset = torch.utils.data.dataset.random_split(
         full_dataset, [nb_train, nb_test])
 
-    train_loader = DataLoader(dataset=train_dataset,
-                              batch_size=args.batch,
-                              shuffle=True,
-                              num_workers=args.num_threads)
+    # train_loader = DataLoader(dataset=train_dataset,
+    #                           batch_size=args.batch,
+    #                           shuffle=True,
+    #                           num_workers=args.num_threads)
 
-    test_loader = DataLoader(dataset=test_dataset,
-                             batch_size=args.batch,
-                             shuffle=True,
-                             num_workers=args.num_threads)
+    # test_loader = DataLoader(dataset=test_dataset,
+    #                          batch_size=args.batch,
+    #                          shuffle=True,
+    #                          num_workers=args.num_threads)
 
-    i = 0
-    for (inputs, targets) in train_loader:
-        if i > 10:
-            break
-        i += 1
-        print("input:\n", inputs)
-        print("target:\n", targets)
+    # i = 0
+    # for (inputs, targets) in train_loader:
+    #     if i > 10:
+    #         break
+    #     i += 1
+    #     print("input:\n", inputs)
+    #     print("target:\n", targets)
 
-
-    
-
-    # #TODO params
+    # TODO params
     # num_param = args.num_var + args.num_const + (args.num_var*args.num_const)
-    model = Autoencoder( num_channel = 3)
+    model = nw.Autoencoder(num_block=3)
     print("Network architechture:\n", model)
 
     use_gpu = torch.cuda.is_available()

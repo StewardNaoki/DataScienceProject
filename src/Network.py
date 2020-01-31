@@ -1,27 +1,9 @@
-import os
-import cv2
-import numpy as np
-from tqdm import tqdm
-
+import sys
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import argparse
-import torch.optim as optim
-from torch.utils.data import Dataset, DataLoader
-# from torch.utils.tensorboard import SummaryWriter
-from torchvision import transforms
-import pandas as pd
-import time
-import sys
-
-import log_writer as lw
-
-
-
 
 # class CrossEntropyOneHot(object):
-
 #     def __call__(self, sample):
 #         _, labels = sample['Y'].max(dim=0)
 #         # landmarks = landmarks.transpose((2, 0, 1))
@@ -32,15 +14,15 @@ import log_writer as lw
 class CNN(nn.Module):
     def __init__(self, l2_reg):
         super(CNN, self).__init__()
-
         self.l2_reg = l2_reg
-
         self.conv1 = nn.Conv2d(
-                in_channels=1,              # input height
-                out_channels=32,            # n_filters
-                kernel_size=5,              # filter size
-                stride=1,                   # filter movement/step
-                padding=2,                  # if want same width and length of this image after Conv2d, padding=(kernel_size-1)/2 if stride=1
+                in_channels=1,    # input height
+                out_channels=32,  # n_filters
+                kernel_size=5,    # filter size
+                stride=1,         # filter movement/step
+                padding=2,        # if want same width and length of
+                                  # this image after Conv2d,
+                                  # padding=(kernel_size-1)/2 if stride=1
             )
 
         self.conv2 = nn.Conv2d(32, 64, 5, 1, 2)
@@ -80,51 +62,60 @@ class CNN(nn.Module):
         return F.softmax(output, dim = 1)
 
 
-
 class Autoencoder(nn.Module):
-    def __init__(self):
-        super(Autoencoder,num_block,self).__init__()
-
+    def __init__(self, num_block):
+        super(Autoencoder, self).__init__()
+        self.num_block = num_block
         self.num_channel = 3
 
-    def encoder(x, filters = 44, num_block = 3, kernel_size = 3):
-
-        self.num_channel = 3
+        filters = 44
+        kernel_size = 3
+        depth = 6
 
         for i in range(num_block):
+            setattr(self, 'encoder{}'.format(i), nn.Sequential(
+                nn.Conv2d(self.num_channel, filters * 2**i, kernel_size=kernel_size),
+                nn.ReLU(),
+                nn.Conv2d(filters * 2**i, filters * 2**i, kernel_size=kernel_size),
+                nn.ReLU(),
+                nn.MaxPool2d(2)))
+        for i in range(depth):
+            setattr(self, 'bottleneck{}'.format(i), nn.Sequential(
+                nn.Conv2d(self.num_channel, filters, kernel_size=kernel_size, dilation=2**i),
+                nn.ReLU(),
+                ))
+        for i in reversed(range(num_block)):
+            setattr(self, 'decoder{}'.format(i), nn.Sequential(
+                nn.Conv2d(self.num_channel, filters * 2**i, kernel_size=kernel_size),
+                nn.ReLU(),
+                nn.Conv2d(filters * 2**i, filters * 2**i, kernel_size=kernel_size),
+                nn.ReLU(),
+                nn.MaxPool2d(2)))
 
-            eval("self.encoder{i}".format(i)) = nn.Sequential(
-            nn.Conv2d(num_channel, fileters * 2**i , kernel_size= kernel_size),
-            nn.ReLU(),
-            nn.Conv2d(fileters * 2**i, fileters * 2**i , kernel_size= kernel_size),
-            nn.ReLU(),
-            nn.MaxPool2d(2))
-            self.num_channel = fileters * 2**i
+    def encoder(self, x, filters=44, num_block=3, kernel_size=3):
+        self.num_channel = 3
+        for i in range(num_block):
+            self.num_channel = filters * 2**i
             x = eval("self.encoder{i}(x)".format(i))
 
         return x
 
-    def decoder(x, filters = 44, num_block = 3, kernel_size = 3):
+    def bottleneck(self, x, filters=44, depth=6, kernel_size=3):
+        for i in range(depth):
+            x = eval("self.bottleneck{i}(x)".format(i))
+        return x
 
-        # self.num_channel = 3
-
+    def decoder(self, x, filters=44, num_block=3, kernel_size=3):
         for i in reversed(range(num_block)):
-
-            eval("self.decoder{i}".format(i)) = nn.Sequential(
-            nn.Conv2d(num_channel, fileters * 2**i , kernel_size= kernel_size),
-            nn.ReLU(),
-            nn.Conv2d(fileters * 2**i, fileters * 2**i , kernel_size= kernel_size),
-            nn.ReLU(),
-            nn.MaxPool2d(2))
-            self.num_channel = fileters * 2**i
+            self.num_channel = filters * 2**i
             x = eval("self.decoder{i}(x)".format(i))
 
         return x
 
-
-    def forward(self,x):
-        x = encoder(x)
-        x = decoder(x)
+    def forward(self, x):
+        x = self.encoder(x)
+        x = self.bottleneck(x)
+        x = self.decoder(x)
         return x
 
 

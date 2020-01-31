@@ -15,7 +15,6 @@ from torch.utils.data import Dataset, DataLoader
 DIEZ = "##########"
 EXTENTION_PNG = ".png"
 EXTENTION_JPG = ".jpg"
-s
 
 
 class ImageDATA(Dataset):
