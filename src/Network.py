@@ -2,6 +2,7 @@ import sys
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import torch.nn.modules.loss
 
 # class CrossEntropyOneHot(object):
 #     def __call__(self, sample):
@@ -187,6 +188,12 @@ def train(model, loader, f_loss, optimizer, device):
         optimizer.step()
     return tot_loss/N, correct/N
 
+def custom_loss(intput, target):
+    m = nn.sigmoid
+    loss = nn.BCELoss()
+    output = loss(m(input), target)
+    output.backward()
+    return output
 
 def test(model, loader, f_loss, device, final_test=False):
     """
