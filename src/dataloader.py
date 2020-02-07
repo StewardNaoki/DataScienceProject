@@ -32,7 +32,7 @@ class ImageDATA(Dataset):
         self.transform = transform
         self.image_directory = image_directory
         self.mask_directory = mask_directory
-        self.IMG_SIZE = 64
+        self.IMG_SIZE = 256
 
     def __len__(self):
         return len(self.data_frame)
@@ -44,8 +44,9 @@ class ImageDATA(Dataset):
 
         img_name = os.path.join(
             self.image_directory, self.data_frame["img"].iloc[idx] + EXTENTION_JPG)
-        print("image name: ", img_name)
-        image = cv2.imread(img_name, cv2.IMREAD_GRAYSCALE)
+        # print("image name: ", img_name)
+        image = cv2.imread(img_name, cv2.IMREAD_COLOR)
+        # print(image.shape)
 
         assert (image is not None), "This image is None: image name: {}".format(img_name)
         # cv2.imshow("Image", image)
@@ -54,7 +55,7 @@ class ImageDATA(Dataset):
 
         mask_name = os.path.join(
             self.mask_directory, self.data_frame["img"].iloc[idx] + EXTENTION_PNG)
-        print("mask name: ", mask_name)
+        # print("mask name: ", mask_name)
         mask = cv2.imread(mask_name, cv2.IMREAD_GRAYSCALE)
         # cv2.imshow("Mask", mask)
         # cv2.waitKey(0)
@@ -82,12 +83,14 @@ class ToTensor(object):
         # torch image: C X H X W
 
         if len(image.shape) == 3:
-            print(image.shape)
             image = image.transpose((2, 0, 1))
-            mask = mask.transpose((2, 0, 1))
         elif len(image.shape) == 2:
-            mask = np.reshape(mask, (1, mask.shape[0], mask.shape[1]))
             image = np.reshape(image, (1, image.shape[0], image.shape[1]))
+
+        if len(mask.shape) == 3:
+            mask = mask.transpose((2, 0, 1))
+        elif len(mask.shape) == 2:
+            mask = np.reshape(mask, (1, mask.shape[0], mask.shape[1]))
 
         return {'image': torch.from_numpy(image).float(),
                 'mask': torch.from_numpy(mask).float()}

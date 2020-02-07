@@ -79,25 +79,28 @@ class Autoencoder(nn.Module):
 
         for i in range(num_block):
             setattr(self, 'encoder{}'.format(i), nn.Sequential(
-                nn.Conv2d(self.num_channel, filters * 2**i, kernel_size=kernel_size),
+                nn.Conv2d(self.num_channel, filters * 2**i, kernel_size=kernel_size, padding=1),
                 nn.ReLU(),
-                nn.Conv2d(filters * 2**i, filters * 2**i, kernel_size=kernel_size),
-                nn.ReLU(),
-                nn.MaxPool2d(2)))
+                nn.Conv2d(filters * 2**i, filters * 2**i, kernel_size=kernel_size, padding=1),
+                nn.ReLU()))
+            self.num_channel = filters * 2**i
+
         for i in range(depth):
             setattr(self, 'bottleneck{}'.format(i), nn.Sequential(
-                nn.Conv2d(self.num_channel, filters, kernel_size=kernel_size, dilation=2**i),
+                nn.Conv2d(self.num_channel, self.num_channel, kernel_size=kernel_size, padding=1),  # , dilation=2**i),
                 nn.ReLU(),
                 ))
+
         for i in reversed(range(num_block)):
             setattr(self, 'decoder1{}'.format(i), nn.Sequential(
-                nn.Conv2d(self.num_channel, filters * 2**i, kernel_size=kernel_size),
+                nn.Conv2d(self.num_channel, filters * 2**i, kernel_size=kernel_size, padding=1),
                 nn.ReLU(),
                 ))
             setattr(self, 'decoder2{}'.format(i), nn.Sequential(
-                nn.Conv2d(filters * 2**i, filters * 2**i, kernel_size=kernel_size),
-                nn.ReLU(),
-                nn.MaxPool2d(2)))
+                nn.Conv2d(filters * 2**(i+1), filters * 2**i, kernel_size=kernel_size, padding=1),
+                nn.ReLU()))
+            self.num_channel = filters * 2**i
+        self.out_layer = nn.Sequential(nn.Conv2d(self.num_channel, 1, kernel_size=1), nn.Sigmoid())
 
     def encoder(self, x, filters=44, num_block=3, kernel_size=3):
         self.num_channel = 3
@@ -105,7 +108,8 @@ class Autoencoder(nn.Module):
         for i in range(num_block):
             self.num_channel = filters * 2**i
             x = eval("self.encoder{}(x)".format(i))
-            self.skip.append(x)
+            self.skip.append(x)  # vérifier que la taille est bonne ?
+            x = nn.MaxPool2d(2)(x)
 
         return x
 
@@ -118,7 +122,9 @@ class Autoencoder(nn.Module):
         for i in reversed(range(num_block)):
             x = nn.Upsample(scale_factor=2, mode='nearest')(x)
             x = eval("self.decoder1{}(x)".format(i))
-            x = torch.cat(self.skip, x)
+            print(i, x.shape, self.skip[i].shape)
+            x = torch.cat((self.skip[i], x), axis=1)  # vérifier que la taille est bonne ?
+            print(i, x.shape)
             self.num_channel = filters * 2**i
             x = eval("self.decoder2{}(x)".format(i))
         return x
@@ -127,6 +133,7 @@ class Autoencoder(nn.Module):
         x = self.encoder(x)
         x = self.bottleneck(x)
         x = self.decoder(x)
+        x = self.out_layer(x)
         return x
 
 
@@ -160,6 +167,8 @@ def train(model, loader, f_loss, optimizer, device):
 
         # Compute the forward pass through the network up to the loss
         outputs = model(inputs)
+        print(outputs.shape)
+        assert(False)
 
         loss = f_loss(outputs, targets)
         # print("Loss: ", loss)
