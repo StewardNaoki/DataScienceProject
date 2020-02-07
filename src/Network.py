@@ -179,10 +179,10 @@ def train(model, loader, f_loss, optimizer, device):
         optimizer.step()
     return tot_loss/N, correct/N
 
-def custom_loss(intput, target):
+def custom_loss(intputs, targets): #voir BCEWithLogitsLoss
     m = nn.sigmoid
     loss = nn.BCELoss()
-    output = loss(m(input), target)
+    output = loss(m(inputs), targets)
     output.backward()
     return output
 
