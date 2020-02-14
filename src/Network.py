@@ -1,4 +1,3 @@
-import sys
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -249,15 +248,12 @@ def test(model, loader, f_loss, device, final_test=False):
     return tot_loss/N, correct/N
 
 
-
-
-
 class Custom_loss():
     def __init__(self):
         pass
 
-    def __call__(self, inputs, targets): #voir BCEWithLogitsLoss
-        m = nn.sigmoid
+    def __call__(self, inputs, targets):  # voir BCEWithLogitsLoss
+        m = nn.Sigmoid()
         f_loss = nn.BCELoss()
         output = f_loss(m(inputs), targets)
         output.backward()
