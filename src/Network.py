@@ -82,23 +82,25 @@ class Autoencoder(nn.Module):
                 nn.Conv2d(self.num_channel, filters * 2**i, kernel_size=kernel_size, padding=1),
                 nn.ReLU(),
                 nn.Conv2d(filters * 2**i, filters * 2**i, kernel_size=kernel_size, padding=1),
-                nn.ReLU()))
+                nn.ReLU()
+            ))
             self.num_channel = filters * 2**i
 
         for i in range(depth):
             setattr(self, 'bottleneck{}'.format(i), nn.Sequential(
-                nn.Conv2d(self.num_channel, self.num_channel, kernel_size=kernel_size, padding=1),  # , dilation=2**i),
+                nn.Conv2d(self.num_channel, self.num_channel, kernel_size=kernel_size, padding=1),
                 nn.ReLU(),
-                ))
+            ))
 
         for i in reversed(range(num_block)):
             setattr(self, 'decoder1{}'.format(i), nn.Sequential(
                 nn.Conv2d(self.num_channel, filters * 2**i, kernel_size=kernel_size, padding=1),
                 nn.ReLU(),
-                ))
+            ))
             setattr(self, 'decoder2{}'.format(i), nn.Sequential(
                 nn.Conv2d(filters * 2**(i+1), filters * 2**i, kernel_size=kernel_size, padding=1),
-                nn.ReLU()))
+                nn.ReLU()
+            ))
             self.num_channel = filters * 2**i
         self.out_layer = nn.Sequential(nn.Conv2d(self.num_channel, 1, kernel_size=1), nn.Sigmoid())
 
@@ -122,9 +124,7 @@ class Autoencoder(nn.Module):
         for i in reversed(range(num_block)):
             x = nn.Upsample(scale_factor=2, mode='nearest')(x)
             x = eval("self.decoder1{}(x)".format(i))
-            print(i, x.shape, self.skip[i].shape)
             x = torch.cat((self.skip[i], x), axis=1)  # vérifier que la taille est bonne ?
-            print(i, x.shape)
             self.num_channel = filters * 2**i
             x = eval("self.decoder2{}(x)".format(i))
         return x
@@ -238,17 +238,15 @@ def test(model, loader, f_loss, device, final_test=False):
             # Be carefull, the model is outputing scores and not the probabilities
             # But given the softmax is not altering the rank of its input scores
             # we can compute the label by argmaxing directly the scores
-            # predicted_targets = outputs
-            # correct += (predicted_targets == targets).sum().item()
+            correct += (outputs == targets).sum().item()
 
             # if final_test:
             #     print("targets:\n", targets[0])
             #     print("predicted targets:\n", outputs[0])
-
     return tot_loss/N, correct/N
 
 
-class Custom_loss():
+class Custom_loss:
     def __init__(self):
         pass
 
@@ -256,5 +254,5 @@ class Custom_loss():
         m = nn.Sigmoid()
         f_loss = nn.BCELoss()
         output = f_loss(m(inputs), targets)
-        output.backward()
+        output.backward(retain_graph=True)
         return output

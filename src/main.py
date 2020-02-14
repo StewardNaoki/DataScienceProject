@@ -120,9 +120,7 @@ def main():
 
     model.to(device)
 
-    # f_loss = torch.nn.CrossEntropyLoss()
-    # f_loss = nn.MSELoss()
-    f_loss = nw.Custom_loss()
+    f_loss = nn.BCEWithLogitsLoss()
     optimizer = torch.optim.Adam(model.parameters())
 
     top_logdir = LOG_DIR + FC1
@@ -167,7 +165,8 @@ def main():
 
             # lw.write_log(log_file_path, val_acc, val_loss, train_acc, train_loss)
 
-            tensorboard_writer.add_scalars("Loss/", {'train_loss': train_loss, 'val_loss': val_loss }, t)
+            if args.log:
+                tensorboard_writer.add_scalars("Loss/", {'train_loss': train_loss, 'val_loss': val_loss }, t)
             # tensorboard_writer.add_scalar(METRICS + 'train_loss', train_loss, t)
             # tensorboard_writer.add_scalar(METRICS + 'train_acc',  train_acc, t)
             # tensorboard_writer.add_scalar(METRICS + 'val_loss', val_loss, t)
