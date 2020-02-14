@@ -169,7 +169,7 @@ def train(model, loader, f_loss, optimizer, device):
         # Compute the forward pass through the network up to the loss
         outputs = model(inputs)
         print(outputs.shape)
-        assert(False)
+        # assert(False)
 
         loss = f_loss(outputs, targets)
         # print("Loss: ", loss)
@@ -177,9 +177,9 @@ def train(model, loader, f_loss, optimizer, device):
         tot_loss += inputs.shape[0] * f_loss(outputs, targets).item()
 
         # print("Output: ", outputs)
-        predicted_targets = outputs
+        # predicted_targets = outputs
 
-        correct += (predicted_targets == targets).sum().item()
+        # correct += (predicted_targets == targets).sum().item()
 
         optimizer.zero_grad()
         # model.zero_grad()
@@ -188,16 +188,6 @@ def train(model, loader, f_loss, optimizer, device):
         optimizer.step()
     return tot_loss/N, correct/N
 
-class Custom_loss():
-    def __init__(self):
-        pass
-
-    def __call__(intputs, targets): #voir BCEWithLogitsLoss
-        m = nn.sigmoid
-        loss = nn.BCELoss()
-        output = loss(m(inputs), targets)
-        output.backward()
-        return output
 
 def test(model, loader, f_loss, device, final_test=False):
     """
@@ -249,8 +239,8 @@ def test(model, loader, f_loss, device, final_test=False):
             # Be carefull, the model is outputing scores and not the probabilities
             # But given the softmax is not altering the rank of its input scores
             # we can compute the label by argmaxing directly the scores
-            predicted_targets = outputs
-            correct += (predicted_targets == targets).sum().item()
+            # predicted_targets = outputs
+            # correct += (predicted_targets == targets).sum().item()
 
             # if final_test:
             #     print("targets:\n", targets[0])
@@ -259,21 +249,16 @@ def test(model, loader, f_loss, device, final_test=False):
     return tot_loss/N, correct/N
 
 
-class ModelCheckpoint:
-
-    def __init__(self, filepath, model):
-        self.min_loss = None
-        self.filepath = filepath
-        self.model = model
-
-    def update(self, loss):
-        if (self.min_loss is None) or (loss < self.min_loss):
-            print("Saving a better model to ", self.filepath)
-            torch.save(self.model.state_dict(), self.filepath)
-            # torch.save(self.model, self.filepath)
-            self.min_loss = loss
 
 
-def progress(loss, acc):
-    print(' Training   : Loss : {:2.4f}, Acc : {:2.4f}\r'.format(loss, acc))
-    sys.stdout.flush()
+
+class Custom_loss():
+    def __init__(self):
+        pass
+
+    def __call__(self, inputs, targets): #voir BCEWithLogitsLoss
+        m = nn.sigmoid
+        f_loss = nn.BCELoss()
+        output = f_loss(m(inputs), targets)
+        output.backward()
+        return output

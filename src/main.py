@@ -34,6 +34,26 @@ DIEZ = "##########"
 EXTENTION_PNG = ".png"
 EXTENTION_JPG = ".jpg"
 
+class ModelCheckpoint:
+
+    def __init__(self, filepath, model):
+        self.min_loss = None
+        self.filepath = filepath
+        self.model = model
+
+    def update(self, loss):
+        if (self.min_loss is None) or (loss < self.min_loss):
+            print("Saving a better model to ", self.filepath)
+            torch.save(self.model.state_dict(), self.filepath)
+            # torch.save(self.model, self.filepath)
+            self.min_loss = loss
+
+
+def progress(loss, acc):
+    print(' Training   : Loss : {:2.4f}, Acc : {:2.4f}\r'.format(loss, acc))
+    sys.stdout.flush()
+
+
 
 def main():
 
@@ -115,28 +135,28 @@ def main():
     f_loss = nw.Custom_loss()
     optimizer = torch.optim.Adam(model.parameters())
 
-    # top_logdir = LOG_DIR + FC1
-    # if not os.path.exists(top_logdir):
-    #     os.mkdir(top_logdir)
-    # model_checkpoint = ModelCheckpoint(top_logdir + BEST_MODELE, model)
+    top_logdir = LOG_DIR + FC1
+    if not os.path.exists(top_logdir):
+        os.mkdir(top_logdir)
+    model_checkpoint = ModelCheckpoint(top_logdir + BEST_MODELE, model)
 
-    # if args.log:
-    #     print("Writing log")
-    #     #generate unique folder for new run
-    #     run_dir_path, num_run = lw.generate_unique_run_dir(LOG_DIR,"run")
+    if args.log:
+        print("Writing log")
+        #generate unique folder for new run
+        run_dir_path, num_run = lw.generate_unique_run_dir(LOG_DIR,"run")
 
-    #     tensorboard_writer = SummaryWriter(
-    #         log_dir=run_dir_path, filename_suffix=".log")
+        tensorboard_writer = SummaryWriter(
+            log_dir=run_dir_path, filename_suffix=".log")
 
-    #     # write short description of the run
-    #     run_desc = "Epoch{}Reg{}Var{}Const{}CLoss{}Dlayer{}Alpha{}".format(
-    #         args.num_epoch,
-    #         args.l2_reg,
-    #         args.num_var,
-    #         args.num_const,
-    #         args.custom_loss,
-    #         args.num_deep_layer,
-    #         args.alpha)
+        # write short description of the run
+        # run_desc = "Epoch{}Reg{}Var{}Const{}CLoss{}Dlayer{}Alpha{}".format(
+        #     args.num_epoch,
+        #     args.l2_reg,
+        #     args.num_var,
+        #     args.num_const,
+        #     args.custom_loss,
+        #     args.num_deep_layer,
+        #     args.alpha)
     #     log_file_path =  LOG_DIR + "Run{}".format(num_run) + run_desc + ".log"
 
     # log_file_path = lw.generate_unique_logpath(LOG_DIR, "Linear")
@@ -146,28 +166,31 @@ def main():
             print(DIEZ + "Epoch Number: {}".format(t) + DIEZ)
             train_loss, train_acc = nw.train(model, train_loader, f_loss, optimizer, device)
 
-            # progress(train_loss, train_acc)
-            # time.sleep(0.5)
+            progress(train_loss, train_acc)
+            time.sleep(0.5)
 
-            # val_loss, val_acc = test(model, test_loader, f_loss, device)
-            # print(" Validation : Loss : {:.4f}, Acc : {:.4f}".format(
-            #     val_loss, val_acc))
+            val_loss, val_acc = nw.test(model, test_loader, f_loss, device)
+            print(" Validation : Loss : {:.4f}, Acc : {:.4f}".format(
+                val_loss, val_acc))
 
-            # model_checkpoint.update(val_loss)
+            model_checkpoint.update(val_loss)
 
             # lw.write_log(log_file_path, val_acc, val_loss, train_acc, train_loss)
-
+            
+            tensorboard_writer.add_scalars("Loss/", {'train_loss': train_loss,
+                                                           'val_loss': val_loss
+                                                           }, t)
             # tensorboard_writer.add_scalar(METRICS + 'train_loss', train_loss, t)
             # tensorboard_writer.add_scalar(METRICS + 'train_acc',  train_acc, t)
             # tensorboard_writer.add_scalar(METRICS + 'val_loss', val_loss, t)
             # tensorboard_writer.add_scalar(METRICS + 'val_acc',  val_acc, t)
 
-    # model.load_state_dict(torch.load(MODEL_PATH))
-    # print(DIEZ+" Final Test "+DIEZ)
-    # test_loss, test_acc = test(
-    #     model, test_loader, f_loss, device, final_test=True)
-    # print(" Test       : Loss : {:.4f}, Acc : {:.4f}".format(
-    #     test_loss, test_acc))
+    model.load_state_dict(torch.load(MODEL_PATH))
+    print(DIEZ+" Final Test "+DIEZ)
+    test_loss, test_acc = nw.test(
+        model, test_loader, f_loss, device, final_test=True)
+    print(" Test       : Loss : {:.4f}, Acc : {:.4f}".format(
+        test_loss, test_acc))
 
     # lw.create_acc_loss_graph(log_file_path)
 
