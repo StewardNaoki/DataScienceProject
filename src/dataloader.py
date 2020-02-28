@@ -32,33 +32,20 @@ class ImageDATA(Dataset):
         self.transform = transform
         self.image_directory = image_directory
         self.mask_directory = mask_directory
-        self.IMG_SIZE = 256
+        self.IMG_SIZE = 64
 
     def __len__(self):
         return len(self.data_frame)
 
     def __getitem__(self, idx):
-        # if torch.is_tensor(idx):
-        #     idx = idx.tolist()
-        # print(self.data_frame.head())
-
         img_name = os.path.join(
             self.image_directory, self.data_frame["img"].iloc[idx] + EXTENTION_JPG)
-        # print("image name: ", img_name)
         image = cv2.imread(img_name, cv2.IMREAD_COLOR)
-        # print(image.shape)
-
         assert (image is not None), "This image is None: image name: {}".format(img_name)
-        # cv2.imshow("Image", image)
-        # cv2.waitKey(0)
-        image = cv2.resize(image, (self.IMG_SIZE, self.IMG_SIZE))
 
         mask_name = os.path.join(
             self.mask_directory, self.data_frame["img"].iloc[idx] + EXTENTION_PNG)
-        # print("mask name: ", mask_name)
         mask = cv2.imread(mask_name, cv2.IMREAD_GRAYSCALE)
-        # cv2.imshow("Mask", mask)
-        # cv2.waitKey(0)
 
         assert (mask is not None), "This image is None: image name: {}".format(mask_name)
         mask = cv2.resize(mask, (self.IMG_SIZE, self.IMG_SIZE))
@@ -97,7 +84,6 @@ class ToTensor(object):
 
 
 class Normalize(object):
-
     def __call__(self, sample):
         image = sample['image']
 

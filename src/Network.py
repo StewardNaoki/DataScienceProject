@@ -163,12 +163,9 @@ def train(model, loader, f_loss, optimizer, device):
     tot_loss, correct = 0.0, 0.0
     for i, (inputs, targets) in enumerate(loader):
         inputs, targets = inputs.to(device), targets.to(device)
-        # print("***",inputs.shape)
 
         # Compute the forward pass through the network up to the loss
         outputs = model(inputs)
-        print(outputs.shape)
-        # assert(False)
 
         loss = f_loss(outputs, targets)
         # print("Loss: ", loss)
@@ -177,13 +174,10 @@ def train(model, loader, f_loss, optimizer, device):
 
         # print("Output: ", outputs)
         # predicted_targets = outputs
-
         # correct += (predicted_targets == targets).sum().item()
 
         optimizer.zero_grad()
-        # model.zero_grad()
         loss.backward()
-        # model.penalty().backward()
         optimizer.step()
     return tot_loss/N, correct/N
 
