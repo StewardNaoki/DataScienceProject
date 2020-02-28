@@ -22,7 +22,7 @@ CSV_NAME = "train_label.csv"
 LOG_DIR = "./../log/"
 MODEL_DIR = "model/"
 BEST_MODELE = "best_model.pt"
-MODEL_PATH = LOG_DIR + FC1 + BEST_MODELE
+MODEL_PATH = LOG_DIR + MODEL_DIR + BEST_MODELE
 LABEL_FILE_PATH = DATA_PATH + CSV_NAME
 IMAGE_FOLDER_PATH = DATA_PATH + "Images/train/images/"
 MASK_FOLDER_PATH = DATA_PATH + "Images/train/masks/"
@@ -197,6 +197,7 @@ def main():
     print(DIEZ+" Final Test "+DIEZ)
     test_loss, test_acc = nw.test(
         model, test_loader, f_loss, device, final_test=True, log_manager = LogManager)
+
     print(" Test       : Loss : {:.4f}, Acc : {:.4f}".format(
         test_loss, test_acc))
 
