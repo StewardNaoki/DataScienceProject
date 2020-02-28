@@ -170,8 +170,8 @@ def main():
         # log_file_path = lw.generate_unique_logpath(LOG_DIR, "Linear")
 
     for t in tqdm(range(args.epoch)):
-            # pbar.set_description("Epoch Number{}".format(t))
-            print(DIEZ + "Epoch Number: {}".format(t) + DIEZ)
+            pbar.set_description("Epoch Number{}".format(t))
+            # print(DIEZ + "Epoch Number: {}".format(t) + DIEZ)
             train_loss, train_acc = nw.train(model, train_loader, f_loss, optimizer, device, LogManager)
 
             progress(train_loss, train_acc)
@@ -196,7 +196,7 @@ def main():
     model.load_state_dict(torch.load(path_model_check_point + BEST_MODELE))
     print(DIEZ+" Final Test "+DIEZ)
     test_loss, test_acc = nw.test(
-        model, test_loader, f_loss, device, final_test=True, LogManager)
+        model, test_loader, f_loss, device, final_test=True, log_manager = LogManager)
     print(" Test       : Loss : {:.4f}, Acc : {:.4f}".format(
         test_loss, test_acc))
 
