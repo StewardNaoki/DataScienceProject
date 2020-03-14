@@ -94,7 +94,7 @@ def main():
     nb_test = 2  # len(full_dataset) - nb_train
     print("Size of full data set: ", len(full_dataset))
     print("Size of training data: ", nb_train)
-    print("Size of testing data: ", nb_test)
+    print("Size of testing data:  ", nb_test)
     train_dataset, test_dataset = torch.utils.data.dataset.random_split(
         full_dataset, [nb_train, nb_test])
 
