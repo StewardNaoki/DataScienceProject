@@ -169,8 +169,10 @@ def main():
         # log_file_path = LOG_DIR + "Run{}".format(num_run) + run_desc + ".log"
         # log_file_path = lw.generate_unique_logpath(LOG_DIR, "Linear")
 
-    for t in tqdm(range(args.epoch)):
-            pbar.set_description("Epoch Number{}".format(t))
+    with tqdm(total=args.epoch) as pbar:
+        for t in range(args.epoch):
+            pbar.update(1)
+            pbar.set_description("Epoch {}".format(t))
             # print(DIEZ + "Epoch Number: {}".format(t) + DIEZ)
             train_loss, train_acc = nw.train(model, train_loader, f_loss, optimizer, device, LogManager)
 
