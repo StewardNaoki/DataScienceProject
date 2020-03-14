@@ -121,23 +121,21 @@ def main():
     model.to(device)
 
     f_loss = nn.BCEWithLogitsLoss()
-    
-    
-    #define optimizer
+
+    # define optimizer
     optimizer = torch.optim.Adam(model.parameters(), weight_decay=args.l2_reg)
 
-    #Make run directory
+    # Make run directory
     run_name = "run-"
-    LogManager = lw.LogManager(LOG_DIR,run_name)
+    LogManager = lw.LogManager(LOG_DIR, run_name)
     run_dir_path, num_run = LogManager.generate_unique_dir()
 
-    #setup model checkpoint
+    # setup model checkpoint
     path_model_check_point = run_dir_path + MODEL_DIR
     if not os.path.exists(path_model_check_point):
         os.mkdir(path_model_check_point)
     model_checkpoint = ModelCheckpoint(
         path_model_check_point + BEST_MODELE, model)
-    
 
     # top_logdir = LOG_DIR + FC1
     # if not os.path.exists(top_logdir):
@@ -146,15 +144,15 @@ def main():
 
     if args.log:
         print("Writing log")
-        #generate unique folder for new run
+        # generate unique folder for new run
         tensorboard_writer = SummaryWriter(
             log_dir=run_dir_path, filename_suffix=".log")
         LogManager.set_tensorboard_writer(tensorboard_writer)
 
-        #write short description of the run
+        # write short description of the run
         run_desc = "Epoch{}".format(args.epoch)
-        log_file_path = LOG_DIR  + run_desc + "Run{}".format(num_run) + ".log"
-        # LogManager.summary_writer(model,optimizer)
+        log_file_path = LOG_DIR + run_desc + "Run{}".format(num_run) + ".log"
+        # LogManager.summary_writer(model, optimizer)
 
         # write short description of the run
         # run_desc = "Epoch{}Reg{}Var{}Const{}CLoss{}Dlayer{}Alpha{}".format(
@@ -185,18 +183,18 @@ def main():
             # lw.write_log(log_file_path, val_acc, val_loss, train_acc, train_loss)
 
             if args.log:
-                tensorboard_writer.add_scalars("Loss/", {'train_loss': train_loss, 'val_loss': val_loss }, t)
+                tensorboard_writer.add_scalars("Loss/", {'train_loss': train_loss, 'val_loss': val_loss}, t)
             # tensorboard_writer.add_scalar(METRICS + 'train_loss', train_loss, t)
             # tensorboard_writer.add_scalar(METRICS + 'train_acc',  train_acc, t)
             # tensorboard_writer.add_scalar(METRICS + 'val_loss', val_loss, t)
             # tensorboard_writer.add_scalar(METRICS + 'val_acc',  val_acc, t)
             LogManager.write_log(log_file_path, val_acc,
-                             val_loss, train_acc, train_loss)
+                                 val_loss, train_acc, train_loss)
 
     model.load_state_dict(torch.load(path_model_check_point + BEST_MODELE))
     print(DIEZ+" Final Test "+DIEZ)
     test_loss, test_acc = nw.test(
-        model, test_loader, f_loss, device, final_test=True, log_manager = LogManager)
+        model, test_loader, f_loss, device, final_test=True, log_manager=LogManager)
 
     print(" Test       : Loss : {:.4f}, Acc : {:.4f}".format(
         test_loss, test_acc))
