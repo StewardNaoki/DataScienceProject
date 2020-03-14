@@ -32,7 +32,7 @@ class ImageDATA(Dataset):
         self.transform = transform
         self.image_directory = image_directory
         self.mask_directory = mask_directory
-        self.IMG_SIZE = 64
+        self.IMG_SIZE = 32
 
     def __len__(self):
         return len(self.data_frame)
@@ -78,6 +78,8 @@ class ToTensor(object):
             mask = mask.transpose((2, 0, 1))
         elif len(mask.shape) == 2:
             mask = np.reshape(mask, (1, mask.shape[0], mask.shape[1]))
+        print(image.shape)
+        print(mask.shape)
 
         return {'image': torch.from_numpy(image).float(),
                 'mask': torch.from_numpy(mask).float()}

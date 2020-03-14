@@ -3,6 +3,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.nn.modules.loss
 
+import log_writer as lw
+
 # class CrossEntropyOneHot(object):
 #     def __call__(self, sample):
 #         _, labels = sample['Y'].max(dim=0)
@@ -137,7 +139,7 @@ class Autoencoder(nn.Module):
         return x
 
 
-def train(model, loader, f_loss, optimizer, device):
+def train(model, loader, f_loss, optimizer, device, log_manager = None):
     """
     Train a model for one epoch, iterating over the loader
     using the f_loss to compute the loss and the optimizer
@@ -182,7 +184,7 @@ def train(model, loader, f_loss, optimizer, device):
     return tot_loss/N, correct/N
 
 
-def test(model, loader, f_loss, device, final_test=False):
+def test(model, loader, f_loss, device, final_test=False, log_manager = None):
     """
     Test a model by iterating over the loader
 
@@ -219,6 +221,10 @@ def test(model, loader, f_loss, device, final_test=False):
 
             # Compute the forward pass, i.e. the scores for each input image
             outputs = model(inputs)
+            
+            #send image to tensor board
+            if i ==1 and final_test:
+                log_manager.tensorboard_send_image(i, inputs[0], targets[0], outputs[0])
 
             # We accumulate the exact number of processed samples
             N += inputs.shape[0]
