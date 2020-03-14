@@ -41,6 +41,7 @@ class ImageDATA(Dataset):
         img_name = os.path.join(
             self.image_directory, self.data_frame["img"].iloc[idx] + EXTENTION_JPG)
         image = cv2.imread(img_name, cv2.IMREAD_COLOR)
+        image = cv2.resize(image, (512, 512))
         assert (image is not None), "This image is None: image name: {}".format(img_name)
 
         mask_name = os.path.join(
@@ -48,7 +49,8 @@ class ImageDATA(Dataset):
         mask = cv2.imread(mask_name, cv2.IMREAD_GRAYSCALE)
 
         assert (mask is not None), "This image is None: image name: {}".format(mask_name)
-        mask = cv2.resize(mask, (self.IMG_SIZE, self.IMG_SIZE))
+        # mask = cv2.resize(mask, (self.IMG_SIZE, self.IMG_SIZE))
+        mask = cv2.resize(mask, (512, 512))
 
         sample = {'image': np.array(image), 'mask': np.array(mask)}
 
@@ -78,8 +80,6 @@ class ToTensor(object):
             mask = mask.transpose((2, 0, 1))
         elif len(mask.shape) == 2:
             mask = np.reshape(mask, (1, mask.shape[0], mask.shape[1]))
-        print(image.shape)
-        print(mask.shape)
 
         return {'image': torch.from_numpy(image).float(),
                 'mask': torch.from_numpy(mask).float()}

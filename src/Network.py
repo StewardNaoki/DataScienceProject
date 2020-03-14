@@ -184,7 +184,7 @@ def train(model, loader, f_loss, optimizer, device, log_manager = None):
     return tot_loss/N, correct/N
 
 
-def test(model, loader, f_loss, device, final_test=False, log_manager = None):
+def test(model, loader, f_loss, device, final_test=False, log_manager=None):
     """
     Test a model by iterating over the loader
 
@@ -223,7 +223,8 @@ def test(model, loader, f_loss, device, final_test=False, log_manager = None):
             outputs = model(inputs)
             
             #send image to tensor board
-            if i ==1 and final_test:
+            if i == 0 and final_test:
+                print("sending image")
                 log_manager.tensorboard_send_image(i, inputs[0], targets[0], outputs[0])
 
             # We accumulate the exact number of processed samples

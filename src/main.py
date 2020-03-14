@@ -90,8 +90,8 @@ def main():
                                 mask_directory=MASK_FOLDER_PATH,
                                 transform=data_transforms)
 
-    nb_train = 8  # int((1.0 - valid_ratio) * len(full_dataset))
-    nb_test = 2  # len(full_dataset) - nb_train
+    nb_train = int((1.0 - valid_ratio) * len(full_dataset))
+    nb_test = len(full_dataset) - nb_train
     print("Size of full data set: ", len(full_dataset))
     print("Size of training data: ", nb_train)
     print("Size of testing data:  ", nb_test)
@@ -177,7 +177,7 @@ def main():
             progress(train_loss, train_acc)
             time.sleep(0.5)
 
-            val_loss, val_acc = nw.test(model, test_loader, f_loss, device, LogManager)
+            val_loss, val_acc = nw.test(model, test_loader, f_loss, device, False, LogManager)
             print(" Validation : Loss : {:.4f}, Acc : {:.4f}".format(val_loss, val_acc))
 
             model_checkpoint.update(val_loss)
