@@ -247,13 +247,4 @@ def test(model, loader, f_loss, device, final_test=False, log_manager=None):
     return tot_loss/N, correct/N
 
 
-class Custom_loss:
-    def __init__(self):
-        pass
 
-    def __call__(self, inputs, targets):  # voir BCEWithLogitsLoss
-        m = nn.Sigmoid()
-        f_loss = nn.BCELoss()
-        output = f_loss(m(inputs), targets)
-        output.backward(retain_graph=True)
-        return output

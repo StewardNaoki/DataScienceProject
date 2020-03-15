@@ -56,7 +56,7 @@ class LogManager:
     def tensorboard_send_image(self, index, image_input, mask_target, mask_output):
         self.tensorboard_writer.add_image('image{}'.format(index), image_input, 0)
         self.tensorboard_writer.add_image('mask_target{}'.format(index), mask_target, 0)
-        self.tensorboard_writer.add_image('mask_input{}'.format(index), mask_output, 0)
+        self.tensorboard_writer.add_image('mask_output{}'.format(index), mask_output, 0)
 
 
 

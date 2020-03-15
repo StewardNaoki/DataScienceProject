@@ -90,8 +90,10 @@ def main():
                                 mask_directory=MASK_FOLDER_PATH,
                                 transform=data_transforms)
 
-    nb_train = int((1.0 - valid_ratio) * len(full_dataset))
-    nb_test = len(full_dataset) - nb_train
+    # nb_train = int((1.0 - valid_ratio) * len(full_dataset))
+    # nb_test = len(full_dataset) - nb_train
+    nb_train = 4
+    nb_test = 2
     print("Size of full data set: ", len(full_dataset))
     print("Size of training data: ", nb_train)
     print("Size of testing data:  ", nb_test)

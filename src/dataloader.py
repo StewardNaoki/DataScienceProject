@@ -51,6 +51,10 @@ class ImageDATA(Dataset):
         assert (mask is not None), "This image is None: image name: {}".format(mask_name)
         # mask = cv2.resize(mask, (self.IMG_SIZE, self.IMG_SIZE))
         mask = cv2.resize(mask, (512, 512))
+        # print("mask ", mask)
+        # print("image ", image)
+        # print(np.max(mask))
+        # assert(False)
 
         sample = {'image': np.array(image), 'mask': np.array(mask)}
 
@@ -87,8 +91,8 @@ class ToTensor(object):
 
 class Normalize(object):
     def __call__(self, sample):
-        image = sample['image']
+        image, mask = sample['image'], sample['mask']
 
         # landmarks = landmarks.transpose((2, 0, 1))
-        return {'image': (image/255) - 0.5,
-                'mask': sample['mask']}
+        return {'image': (image/255),
+                'mask': (mask/255)}
