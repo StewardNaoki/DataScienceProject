@@ -78,30 +78,41 @@ class Autoencoder(nn.Module):
         filters = 44
         kernel_size = 3
         depth = 6
+        dropout_rate = 0.2
+        # m = nn.BatchNorm2d(100)
 
         for i in range(num_block):
             setattr(self, 'encoder{}'.format(i), nn.Sequential(
                 nn.Conv2d(self.num_channel, filters * 2**i, kernel_size=kernel_size, padding=1),
+                nn.BatchNorm2d(filters * 2**i),
                 nn.ReLU(),
+                nn.Dropout(p=dropout_rate),
                 nn.Conv2d(filters * 2**i, filters * 2**i, kernel_size=kernel_size, padding=1),
-                nn.ReLU()
+                nn.BatchNorm2d(filters * 2**i),
+                nn.ReLU(),
+                nn.Dropout(p=dropout_rate)
             ))
             self.num_channel = filters * 2**i
 
         for i in range(depth):
             setattr(self, 'bottleneck{}'.format(i), nn.Sequential(
                 nn.Conv2d(self.num_channel, self.num_channel, kernel_size=kernel_size, padding=1),
-                nn.ReLU(),
+                nn.ReLU()
+                # nn.BatchNorm2d(self.num_channel)
             ))
 
         for i in reversed(range(num_block)):
             setattr(self, 'decoder1{}'.format(i), nn.Sequential(
                 nn.Conv2d(self.num_channel, filters * 2**i, kernel_size=kernel_size, padding=1),
+                nn.BatchNorm2d(filters * 2**i),
                 nn.ReLU(),
+                nn.Dropout(p=dropout_rate)
             ))
             setattr(self, 'decoder2{}'.format(i), nn.Sequential(
                 nn.Conv2d(filters * 2**(i+1), filters * 2**i, kernel_size=kernel_size, padding=1),
-                nn.ReLU()
+                nn.BatchNorm2d(filters * 2**i),
+                nn.ReLU(),
+                nn.Dropout(p=dropout_rate)
             ))
             self.num_channel = filters * 2**i
         self.out_layer = nn.Sequential(nn.Conv2d(self.num_channel, 1, kernel_size=1), nn.Sigmoid())
