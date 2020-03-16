@@ -18,10 +18,11 @@ def dice_loss(a,b):
 class Custom_loss:
     def __init__(self):
         self.sigmoid = nn.Sigmoid()
-        self.f_loss = nn.BCELoss()
+        # self.f_loss = nn.BCELoss()
+        self.f_loss = nn.BCEWithLogitsLoss()
 
     def __call__(self, inputs, targets):  # voir BCEWithLogitsLoss
         
         outputs = self.f_loss(inputs, targets) + dice_loss(inputs, targets)
-        outputs.backward(retain_graph=True)
+        # outputs.backward(retain_graph=True)
         return outputs

@@ -32,29 +32,49 @@ class ImageDATA(Dataset):
         self.transform = transform
         self.image_directory = image_directory
         self.mask_directory = mask_directory
-        self.IMG_SIZE = 32
+        self.IMG_SIZE = 512
 
     def __len__(self):
         return len(self.data_frame)
+
+    def random_transform(self,image, mask):
+        rows, cols, _ = image.shape
+        p = 0.5
+        random_angle = np.random.random() * 180
+        RotationMatrix = cv2.getRotationMatrix2D(
+            ((cols-1)/2.0, (rows-1)/2.0), random_angle, 1)
+        if np.random.random() < p:
+            image, mask = image[::-1, :, :], mask[::-1, :]
+        if np.random.random() < p:
+            image, mask = image[:, ::-1, :], mask[:, ::-1]
+        if np.random.random() < p:
+            image, mask = cv2.warpAffine(image, RotationMatrix, (cols, rows)), cv2.warpAffine(
+                mask, RotationMatrix, (cols, rows))
+        return image, mask
 
     def __getitem__(self, idx):
         img_name = os.path.join(
             self.image_directory, self.data_frame["img"].iloc[idx] + EXTENTION_JPG)
         image = cv2.imread(img_name, cv2.IMREAD_COLOR)
-        image = cv2.resize(image, (512, 512))
-        assert (image is not None), "This image is None: image name: {}".format(img_name)
+        image = cv2.resize(image, (self.IMG_SIZE, self.IMG_SIZE))
+        assert (image is not None), "This image is None: image name: {}".format(
+            img_name)
 
         mask_name = os.path.join(
             self.mask_directory, self.data_frame["img"].iloc[idx] + EXTENTION_PNG)
         mask = cv2.imread(mask_name, cv2.IMREAD_GRAYSCALE)
 
-        assert (mask is not None), "This image is None: image name: {}".format(mask_name)
+        assert (mask is not None), "This image is None: image name: {}".format(
+            mask_name)
         # mask = cv2.resize(mask, (self.IMG_SIZE, self.IMG_SIZE))
-        mask = cv2.resize(mask, (512, 512))
+        mask = cv2.resize(mask, (self.IMG_SIZE, self.IMG_SIZE))
         # print("mask ", mask)
         # print("image ", image)
         # print(np.max(mask))
         # assert(False)
+        # print(image.shape)
+        # print(mask.shape)
+        image, mask = self.random_transform(image, mask)
 
         sample = {'image': np.array(image), 'mask': np.array(mask)}
 

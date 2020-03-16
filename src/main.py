@@ -15,6 +15,7 @@ import sys
 import log_writer as lw
 import Network as nw
 import dataloader as dl
+import loss as loss
 
 CREATE_CSV = True
 DATA_PATH = "./../DATA/"
@@ -122,7 +123,8 @@ def main():
 
     model.to(device)
 
-    f_loss = nn.BCEWithLogitsLoss()
+    # f_loss = nn.BCEWithLogitsLoss()
+    f_loss = loss.Custom_loss()
 
     # define optimizer
     optimizer = torch.optim.Adam(model.parameters(), weight_decay=args.l2_reg)
