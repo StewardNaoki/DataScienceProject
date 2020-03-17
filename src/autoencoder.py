@@ -3,14 +3,6 @@ import torch.nn as nn
 import torch.nn.modules.loss
 
 
-# class CrossEntropyOneHot(object):
-#     def __call__(self, sample):
-#         _, labels = sample['Y'].max(dim=0)
-#         # landmarks = landmarks.transpose((2, 0, 1))
-#         return {'X_image': sample['X_image'],
-#                 'Y': labels}
-
-
 class AutoEncoder(nn.Module):
 
     def __init__(self, num_block, depth):
