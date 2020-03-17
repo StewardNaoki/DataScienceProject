@@ -1,12 +1,13 @@
 import torch
 import torch.nn as nn
 import torch.nn.modules.loss
+import sys
 
 
 class AutoEncoder(nn.Module):
 
     def __init__(self, num_block, depth):
-        super(nn.Module, self).__init__()
+        super().__init__()
         self.num_block = num_block
         self.num_channel = 3
         self.skip = []
@@ -79,6 +80,7 @@ class AutoEncoder(nn.Module):
             x = eval("self.encoder{}(x)".format(i))
             self.skip.append(x)  # vérifier que la taille est bonne ?
             x = nn.MaxPool2d(2)(x)
+        print(sys.getsizeof(self.skip))
 
         return x
 

@@ -115,6 +115,7 @@ def main():
     # TODO params
     # num_param = args.num_var + args.num_const + (args.num_var*args.num_const)
     model = AutoEncoder(num_block=3, depth=args.depth)
+    print("model size:", sys.getsizeof(model))
     print("Network architechture:\n", model)
 
     use_gpu = torch.cuda.is_available()
