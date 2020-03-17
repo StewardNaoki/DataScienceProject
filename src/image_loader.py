@@ -1,15 +1,15 @@
 import os
 import cv2
 import numpy as np
-from tqdm import tqdm
+# from tqdm import tqdm
 
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import sys
-import csv
+# import torch.nn as nn
+# import torch.nn.functional as F
+# import sys
+# import csv
 import pandas as pd
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset  # , DataLoader
 
 
 DIEZ = "##########"
@@ -17,7 +17,7 @@ EXTENTION_PNG = ".png"
 EXTENTION_JPG = ".jpg"
 
 
-class ImageDATA(Dataset):
+class ImageLoader(Dataset):
     """Face Landmarks dataset."""
 
     def __init__(self, csv_file_path, image_directory, mask_directory, transform=None):
@@ -37,7 +37,7 @@ class ImageDATA(Dataset):
     def __len__(self):
         return len(self.data_frame)
 
-    def random_transform(self,image, mask):
+    def random_transform(self, image, mask):
         rows, cols, _ = image.shape
         p = 0.5
         random_angle = np.random.random() * 180
@@ -89,11 +89,12 @@ class ToTensor(object):
     """Convert ndarrays in sample to Tensors."""
 
     def __call__(self, sample):
+        """
+        swap color axis because
+        numpy image: H x W x C
+        torch image: C X H X W
+        """
         image, mask = sample['image'], sample['mask']
-
-        # swap color axis because
-        # numpy image: H x W x C
-        # torch image: C X H X W
 
         if len(image.shape) == 3:
             image = image.transpose((2, 0, 1))

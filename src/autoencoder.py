@@ -1,9 +1,7 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 import torch.nn.modules.loss
 
-# import log_writer as lw
 
 # class CrossEntropyOneHot(object):
 #     def __call__(self, sample):
@@ -13,64 +11,10 @@ import torch.nn.modules.loss
 #                 'Y': labels}
 
 
-class CNN(nn.Module):
-    def __init__(self, l2_reg):
-        super(CNN, self).__init__()
-        self.l2_reg = l2_reg
-        self.conv1 = nn.Conv2d(
-                in_channels=1,    # input height
-                out_channels=32,  # n_filters
-                kernel_size=5,    # filter size
-                stride=1,         # filter movement/step
-                padding=2,        # if want same width and length of
-                                  # this image after Conv2d,
-                                  # padding=(kernel_size-1)/2 if stride=1
-            )
+class AutoEncoder(nn.Module):
 
-        self.conv2 = nn.Conv2d(32, 64, 5, 1, 2)
-        self.conv3 = nn.Conv2d(64, 128, 5, 1, 2)
-
-        self.layer1 = nn.Sequential(        # input shape (1, 28, 28)
-            self.conv1,                     # output shape (16, 28, 28)
-            nn.ReLU(),                      # activation
-            nn.MaxPool2d(kernel_size=2),    # choose max value in 2x2 area, output shape (16, 14, 14)
-        )
-        self.layer2 = nn.Sequential(        # input shape (16, 14, 14)
-            self.conv2,                     # output shape (32, 14, 14)
-            nn.ReLU(),                      # activation
-            nn.MaxPool2d(2),                # output shape (32, 7, 7)
-        )
-        self.layer3 = nn.Sequential(        # input shape (16, 14, 14)
-            self.conv3,                     # output shape (32, 14, 14)
-            nn.ReLU(),                      # activation
-            nn.MaxPool2d(2),                # output shape (32, 7, 7)
-        )
-
-        self.fc1 = nn.Linear(128*8*8, 512)  # fully connected layer, output 10 classes
-        self.fc2 = nn.Linear(512, 2)        # fully connected layer, output 10 classes
-
-    # def penalty(self):
-    #     return (self.l2_reg * (self.conv1.weight.norm(2)
-    #                            + self.conv2.weight.norm(2)
-    #                            + self.conv3.weight.norm(2)
-    #                            + self.fc1.weight.norm(2)
-    #                            + self.fc2.weight.norm(2))
-    #             )
-
-    def forward(self, x):
-        x = self.layer1(x)
-        x = self.layer2(x)
-        x = self.layer3(x)
-        x = x.view(x.size(0), -1)  # flatten the output of conv2 to (batch_size, 32 * 7 * 7)
-        x = self.fc1(x)
-        output = self.fc2(x)
-        # return output, x    # return x for visualization
-        return F.softmax(output, dim=1)
-
-
-class Autoencoder(nn.Module):
     def __init__(self, num_block, depth):
-        super(Autoencoder, self).__init__()
+        super(nn.Module, self).__init__()
         self.num_block = num_block
         self.num_channel = 3
         self.skip = []
@@ -101,7 +45,10 @@ class Autoencoder(nn.Module):
 
         for i in range(self.depth):
             setattr(self, 'bottleneck{}'.format(i), nn.Sequential(
-                nn.Conv2d(self.num_channel, self.num_channel, kernel_size=self.kernel_size, padding=1),
+                nn.Conv2d(self.num_channel,
+                          self.num_channel,
+                          kernel_size=self.kernel_size,
+                          padding=1),
                 nn.ReLU()
                 # nn.BatchNorm2d(self.num_channel)
             ))
@@ -126,7 +73,11 @@ class Autoencoder(nn.Module):
                 nn.Dropout(p=self.dropout_rate)
             ))
             self.num_channel = self.filters * 2**i
-        self.out_layer = nn.Sequential(nn.Conv2d(self.num_channel, 1, kernel_size=1), nn.Sigmoid())
+        self.out_layer = nn.Sequential(
+            nn.Conv2d(self.num_channel,
+                      1,
+                      kernel_size=1),
+            nn.Sigmoid())
 
     def encoder(self, x):
         self.num_channel = 3

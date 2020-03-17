@@ -13,8 +13,8 @@ from torchvision import transforms
 import sys
 
 import log_writer as lw
-import Network as nw
-import dataloader as dl
+from autoencoder import AutoEncoder, train, test
+from image_loader import ImageLoader, ToTensor, Normalize
 import loss as loss
 
 CREATE_CSV = True
@@ -86,19 +86,17 @@ def main():
     valid_ratio = args.valpct  # Going to use 80%/20% split for train/valid
 
     data_transforms = transforms.Compose([
-        dl.ToTensor(), dl.Normalize()
+        ToTensor(), Normalize()
     ])
 
-    # TODO
-    full_dataset = dl.ImageDATA(csv_file_path=LABEL_FILE_PATH,
-                                image_directory=IMAGE_FOLDER_PATH,
-                                mask_directory=MASK_FOLDER_PATH,
-                                transform=data_transforms)
+    full_dataset = ImageLoader(csv_file_path=LABEL_FILE_PATH,
+                               image_directory=IMAGE_FOLDER_PATH,
+                               mask_directory=MASK_FOLDER_PATH,
+                               transform=data_transforms)
 
     nb_train = int((1.0 - valid_ratio) * len(full_dataset))
     nb_test = len(full_dataset) - nb_train
-    # nb_train = 4
-    # nb_test = 2
+
     print("Size of full data set: ", len(full_dataset))
     print("Size of training data: ", nb_train)
     print("Size of testing data:  ", nb_test)
@@ -116,7 +114,7 @@ def main():
                              num_workers=args.num_threads)
     # TODO params
     # num_param = args.num_var + args.num_const + (args.num_var*args.num_const)
-    model = nw.Autoencoder(num_block=3, depth=args.depth)
+    model = AutoEncoder(num_block=3, depth=args.depth)
     print("Network architechture:\n", model)
 
     use_gpu = torch.cuda.is_available()
@@ -180,12 +178,12 @@ def main():
             pbar.update(1)
             pbar.set_description("Epoch {}".format(t))
             # print(DIEZ + "Epoch Number: {}".format(t) + DIEZ)
-            train_loss, train_acc = nw.train(model, train_loader, f_loss, optimizer, device, LogManager)
+            train_loss, train_acc = train(model, train_loader, f_loss, optimizer, device, LogManager)
 
             progress(train_loss, train_acc)
             # time.sleep(0.5)
 
-            val_loss, val_acc = nw.test(model, test_loader, f_loss, device, False, LogManager)
+            val_loss, val_acc = test(model, test_loader, f_loss, device, False, LogManager)
             print(" Validation : Loss : {:.4f}, Acc : {:.4f}".format(val_loss, val_acc))
 
             model_checkpoint.update(val_loss)
@@ -203,8 +201,13 @@ def main():
 
     model.load_state_dict(torch.load(path_model_check_point + BEST_MODELE))
     print(DIEZ + " Final Test " + DIEZ)
-    test_loss, test_acc = nw.test(
-        model, test_loader, f_loss, device, final_test=True, log_manager=LogManager)
+    test_loss, test_acc = test(
+        model,
+        test_loader,
+        f_loss,
+        device,
+        final_test=True,
+        log_manager=LogManager)
 
     print(" Test       : Loss : {:.4f}, Acc : {:.4f}".format(
         test_loss, test_acc))
