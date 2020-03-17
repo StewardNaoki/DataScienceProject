@@ -5,7 +5,8 @@ import os
 
 style.use("ggplot")
 
-model_name = "model-1570490221" # grab whichever model name you want here. We could also just reference the MODEL_NAME if you're in a notebook still.
+# grab whichever model name you want here. We could also just reference the MODEL_NAME if you're in a notebook still.
+model_name = "model-1570490221"
 
 
 class LogManager:
@@ -23,7 +24,7 @@ class LogManager:
         while(True):
             # i = int(time.time() % MAX_TIME)
             i = int(time.time())
-            run_name = self.raw_run_name  + str(i)
+            run_name = self.raw_run_name + str(i)
             run_folder = os.path.join(self.logdir, run_name)
             if not os.path.isdir(run_folder):
                 print("New run folder: {}".format(run_folder))
@@ -33,7 +34,6 @@ class LogManager:
                 return run_folder + "/", i
             # i = i + 1
             time.sleep(1)
-
 
     def generate_unique_logpath(self):
         i = 0
@@ -47,19 +47,18 @@ class LogManager:
                 return log_path
             time.sleep(1)
 
-
-    def write_log(self,log_file_path, val_acc, val_loss, train_acc, train_loss):
+    def write_log(self, log_file_path, val_acc, val_loss, train_acc, train_loss):
         with open(log_file_path, "a") as f:
             print("Logging to {}".format(log_file_path))
             f.write(f"{round(time.time(),3)},{round(float(val_acc),2)},{round(float(val_loss),4)},{round(float(train_acc),2)},{round(float(train_loss),4)}\n")
 
-    def tensorboard_send_image(self, index, image_input, mask_target, mask_output):
-        self.tensorboard_writer.add_image('image{}'.format(index), image_input, 0)
-        self.tensorboard_writer.add_image('mask_target{}'.format(index), mask_target, 0)
-        self.tensorboard_writer.add_image('mask_output{}'.format(index), mask_output, 0)
-
-
-
+    def tensorboard_send_image(self, index, image_input, mask_target, mask_output, txt=""):
+        self.tensorboard_writer.add_image(
+            '{}_image/{}'.format(txt, index), image_input, 0)
+        self.tensorboard_writer.add_image(
+            '{}_mask_target/{}'.format(txt, index), mask_target, 0)
+        self.tensorboard_writer.add_image(
+            '{}_mask_output/{}'.format(txt, index), mask_output, 0)
 
 
 # def generate_unique_run_dir(logdir, raw_run_name):

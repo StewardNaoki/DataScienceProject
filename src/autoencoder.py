@@ -80,7 +80,7 @@ class AutoEncoder(nn.Module):
             x = eval("self.encoder{}(x)".format(i))
             self.skip.append(x)  # vérifier que la taille est bonne ?
             x = nn.MaxPool2d(2)(x)
-        print(sys.getsizeof(self.skip))
+        # print(sys.getsizeof(self.skip))
 
         return x
 
@@ -93,7 +93,8 @@ class AutoEncoder(nn.Module):
         for i in reversed(range(self.num_block)):
             x = nn.Upsample(scale_factor=2, mode='nearest')(x)
             x = eval("self.decoder1{}(x)".format(i))
-            x = torch.cat((self.skip[i], x), axis=1)  # vérifier que la taille est bonne ?
+            # vérifier que la taille est bonne ?
+            x = torch.cat((self.skip[i], x), axis=1)
             self.num_channel = self.filters * 2**i
             x = eval("self.decoder2{}(x)".format(i))
         return x
@@ -137,6 +138,12 @@ def train(model, loader, f_loss, optimizer, device, log_manager=None):
         outputs = model(inputs)
 
         loss = f_loss(outputs, targets)
+
+        # if i == 0:
+        #     # if final_test:
+        #     print("sending image")
+        #     log_manager.tensorboard_send_image(
+        #         i, inputs[0], targets[0], outputs[0], txt= "trainning")
         # print("Loss: ", loss)
         N += inputs.shape[0]
         tot_loss += inputs.shape[0] * f_loss(outputs, targets).item()
@@ -151,7 +158,7 @@ def train(model, loader, f_loss, optimizer, device, log_manager=None):
     return tot_loss/N, correct/N
 
 
-def test(model, loader, f_loss, device, final_test=False, log_manager=None):
+def test(model, loader, f_loss, device, log_manager=None, final_test=False, txt = "testing"):
     """
     Test a model by iterating over the loader
 
@@ -190,9 +197,11 @@ def test(model, loader, f_loss, device, final_test=False, log_manager=None):
             outputs = model(inputs)
 
             # send image to tensor board
-            if i == 0 and final_test:
+            # if i == 0 and final_test:
+            if final_test:
                 print("sending image")
-                log_manager.tensorboard_send_image(i, inputs[0], targets[0], outputs[0])
+                log_manager.tensorboard_send_image(
+                    i, inputs[0], targets[0], outputs[0], txt = txt)
 
             # We accumulate the exact number of processed samples
             N += inputs.shape[0]

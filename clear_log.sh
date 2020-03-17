@@ -1,1 +1,2 @@
-cd log && rm *.log
+set -e
+cd log && rm -r *

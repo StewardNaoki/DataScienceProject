@@ -62,6 +62,8 @@ def main():
                         help="size of the input image (default: 512)")
     parser.add_argument("--depth", type=int, default=6,
                         help="depth of the autoencoder (default: 6)")
+    parser.add_argument("--num_block", type=int, default=3,
+                        help="number of blocks of the autoencoder (default: 3)")
     parser.add_argument("--epoch", type=int, default=1,
                         help="number of epoch (default: 1)")
     parser.add_argument("--batch", type=int, default=100,
@@ -114,7 +116,7 @@ def main():
                              num_workers=args.num_threads)
     # TODO params
     # num_param = args.num_var + args.num_const + (args.num_var*args.num_const)
-    model = AutoEncoder(num_block=3, depth=args.depth)
+    model = AutoEncoder(num_block=args.num_block, depth=args.depth)
     print("model size:", sys.getsizeof(model))
     print("Network architechture:\n", model)
 
@@ -184,7 +186,7 @@ def main():
             progress(train_loss, train_acc)
             # time.sleep(0.5)
 
-            val_loss, val_acc = test(model, test_loader, f_loss, device, False, LogManager)
+            val_loss, val_acc = test(model, test_loader, f_loss, device, LogManager, False)
             print(" Validation : Loss : {:.4f}, Acc : {:.4f}".format(val_loss, val_acc))
 
             model_checkpoint.update(val_loss)
@@ -202,6 +204,15 @@ def main():
 
     model.load_state_dict(torch.load(path_model_check_point + BEST_MODELE))
     print(DIEZ + " Final Test " + DIEZ)
+    _, _ = test(
+        model,
+        train_loader,
+        f_loss,
+        device,
+        final_test=True,
+        log_manager=LogManager,
+        txt="training")
+
     test_loss, test_acc = test(
         model,
         test_loader,

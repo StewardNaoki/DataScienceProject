@@ -40,7 +40,8 @@ class ImageLoader(Dataset):
     def random_transform(self, image, mask):
         rows, cols, _ = image.shape
         p = 0.5
-        random_angle = np.random.random() * 180
+        max_angle = 45
+        random_angle = np.random.random() * max_angle
         RotationMatrix = cv2.getRotationMatrix2D(
             ((cols-1)/2.0, (rows-1)/2.0), random_angle, 1)
         if np.random.random() < p:
