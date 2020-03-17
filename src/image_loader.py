@@ -28,7 +28,7 @@ class ImageLoader(Dataset):
             transform (callable, optional): Optional transform to be applied
                 on a sample.
         """
-        self.data_frame = pd.read_csv(csv_file_path).head(10)
+        self.data_frame = pd.read_csv(csv_file_path)
         self.transform = transform
         self.image_directory = image_directory
         self.mask_directory = mask_directory
