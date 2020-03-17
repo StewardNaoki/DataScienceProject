@@ -2,14 +2,14 @@ import os
 from tqdm import tqdm
 
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
+# import torch.nn as nn
+# import torch.nn.functional as F
 import argparse
-import torch.optim as optim
-from torch.utils.data import Dataset, DataLoader
+# import torch.optim as optim
+from torch.utils.data import DataLoader  # , Dataset
 from torch.utils.tensorboard import SummaryWriter
 from torchvision import transforms
-import time
+# import time
 import sys
 
 import log_writer as lw
@@ -91,10 +91,10 @@ def main():
                                 mask_directory=MASK_FOLDER_PATH,
                                 transform=data_transforms)
 
-    # nb_train = int((1.0 - valid_ratio) * len(full_dataset))
-    # nb_test = len(full_dataset) - nb_train
-    nb_train = 4
-    nb_test = 2
+    nb_train = int((1.0 - valid_ratio) * len(full_dataset))
+    nb_test = len(full_dataset) - nb_train
+    # nb_train = 4
+    # nb_test = 2
     print("Size of full data set: ", len(full_dataset))
     print("Size of training data: ", nb_train)
     print("Size of testing data:  ", nb_test)
@@ -179,7 +179,7 @@ def main():
             train_loss, train_acc = nw.train(model, train_loader, f_loss, optimizer, device, LogManager)
 
             progress(train_loss, train_acc)
-            time.sleep(0.5)
+            # time.sleep(0.5)
 
             val_loss, val_acc = nw.test(model, test_loader, f_loss, device, False, LogManager)
             print(" Validation : Loss : {:.4f}, Acc : {:.4f}".format(val_loss, val_acc))
@@ -198,7 +198,7 @@ def main():
                                  val_loss, train_acc, train_loss)
 
     model.load_state_dict(torch.load(path_model_check_point + BEST_MODELE))
-    print(DIEZ+" Final Test "+DIEZ)
+    print(DIEZ + " Final Test " + DIEZ)
     test_loss, test_acc = nw.test(
         model, test_loader, f_loss, device, final_test=True, log_manager=LogManager)
 

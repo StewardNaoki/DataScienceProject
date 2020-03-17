@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.nn.modules.loss
 
-import log_writer as lw
+# import log_writer as lw
 
 # class CrossEntropyOneHot(object):
 #     def __call__(self, sample):
@@ -77,9 +77,8 @@ class Autoencoder(nn.Module):
 
         filters = 44
         kernel_size = 3
-        depth = 6
+        self.depth = 6
         dropout_rate = 0.2
-        # m = nn.BatchNorm2d(100)
 
         for i in range(num_block):
             setattr(self, 'encoder{}'.format(i), nn.Sequential(
@@ -94,7 +93,7 @@ class Autoencoder(nn.Module):
             ))
             self.num_channel = filters * 2**i
 
-        for i in range(depth):
+        for i in range(self.depth):
             setattr(self, 'bottleneck{}'.format(i), nn.Sequential(
                 nn.Conv2d(self.num_channel, self.num_channel, kernel_size=kernel_size, padding=1),
                 nn.ReLU()
@@ -128,8 +127,8 @@ class Autoencoder(nn.Module):
 
         return x
 
-    def bottleneck(self, x, filters=44, depth=6, kernel_size=3):
-        for i in range(depth):
+    def bottleneck(self, x, filters=44, kernel_size=3):
+        for i in range(self.depth):
             x = eval("self.bottleneck{}(x)".format(i))
         return x
 
@@ -150,7 +149,7 @@ class Autoencoder(nn.Module):
         return x
 
 
-def train(model, loader, f_loss, optimizer, device, log_manager = None):
+def train(model, loader, f_loss, optimizer, device, log_manager=None):
     """
     Train a model for one epoch, iterating over the loader
     using the f_loss to compute the loss and the optimizer
@@ -232,8 +231,8 @@ def test(model, loader, f_loss, device, final_test=False, log_manager=None):
 
             # Compute the forward pass, i.e. the scores for each input image
             outputs = model(inputs)
-            
-            #send image to tensor board
+
+            # send image to tensor board
             if i == 0 and final_test:
                 print("sending image")
                 log_manager.tensorboard_send_image(i, inputs[0], targets[0], outputs[0])
@@ -256,6 +255,3 @@ def test(model, loader, f_loss, device, final_test=False, log_manager=None):
             #     print("targets:\n", targets[0])
             #     print("predicted targets:\n", outputs[0])
     return tot_loss/N, correct/N
-
-
-
