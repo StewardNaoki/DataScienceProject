@@ -58,6 +58,10 @@ def progress(loss, acc):
 
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument("--image_size", type=int, default=512,
+                        help="size of the input image (default: 512)")
+    parser.add_argument("--depth", type=int, default=6,
+                        help="depth of the autoencoder (default: 6)")
     parser.add_argument("--epoch", type=int, default=1,
                         help="number of epoch (default: 1)")
     parser.add_argument("--batch", type=int, default=100,
@@ -112,7 +116,7 @@ def main():
                              num_workers=args.num_threads)
     # TODO params
     # num_param = args.num_var + args.num_const + (args.num_var*args.num_const)
-    model = nw.Autoencoder(num_block=3)
+    model = nw.Autoencoder(num_block=3, depth=args.depth)
     print("Network architechture:\n", model)
 
     use_gpu = torch.cuda.is_available()

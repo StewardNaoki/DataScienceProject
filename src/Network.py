@@ -69,75 +69,87 @@ class CNN(nn.Module):
 
 
 class Autoencoder(nn.Module):
-    def __init__(self, num_block):
+    def __init__(self, num_block, depth):
         super(Autoencoder, self).__init__()
         self.num_block = num_block
         self.num_channel = 3
         self.skip = []
 
-        filters = 44
-        kernel_size = 3
-        self.depth = 6
-        dropout_rate = 0.2
+        self.filters = 44
+        self.kernel_size = 3
+        self.depth = depth
+        self.dropout_rate = 0.2
 
         for i in range(num_block):
             setattr(self, 'encoder{}'.format(i), nn.Sequential(
-                nn.Conv2d(self.num_channel, filters * 2**i, kernel_size=kernel_size, padding=1),
-                nn.BatchNorm2d(filters * 2**i),
+                nn.Conv2d(self.num_channel,
+                          self.filters * 2**i,
+                          kernel_size=self.kernel_size,
+                          padding=1),
+                nn.BatchNorm2d(self.filters * 2**i),
                 nn.ReLU(),
-                nn.Dropout(p=dropout_rate),
-                nn.Conv2d(filters * 2**i, filters * 2**i, kernel_size=kernel_size, padding=1),
-                nn.BatchNorm2d(filters * 2**i),
+                nn.Dropout(p=self.dropout_rate),
+                nn.Conv2d(self.filters * 2**i,
+                          self.filters * 2**i,
+                          kernel_size=self.kernel_size,
+                          padding=1),
+                nn.BatchNorm2d(self.filters * 2**i),
                 nn.ReLU(),
-                nn.Dropout(p=dropout_rate)
+                nn.Dropout(p=self.dropout_rate)
             ))
-            self.num_channel = filters * 2**i
+            self.num_channel = self.filters * 2**i
 
         for i in range(self.depth):
             setattr(self, 'bottleneck{}'.format(i), nn.Sequential(
-                nn.Conv2d(self.num_channel, self.num_channel, kernel_size=kernel_size, padding=1),
+                nn.Conv2d(self.num_channel, self.num_channel, kernel_size=self.kernel_size, padding=1),
                 nn.ReLU()
                 # nn.BatchNorm2d(self.num_channel)
             ))
 
         for i in reversed(range(num_block)):
             setattr(self, 'decoder1{}'.format(i), nn.Sequential(
-                nn.Conv2d(self.num_channel, filters * 2**i, kernel_size=kernel_size, padding=1),
-                nn.BatchNorm2d(filters * 2**i),
+                nn.Conv2d(self.num_channel,
+                          self.filters * 2**i,
+                          kernel_size=self.kernel_size,
+                          padding=1),
+                nn.BatchNorm2d(self.filters * 2**i),
                 nn.ReLU(),
-                nn.Dropout(p=dropout_rate)
+                nn.Dropout(p=self.dropout_rate)
             ))
             setattr(self, 'decoder2{}'.format(i), nn.Sequential(
-                nn.Conv2d(filters * 2**(i+1), filters * 2**i, kernel_size=kernel_size, padding=1),
-                nn.BatchNorm2d(filters * 2**i),
+                nn.Conv2d(self.filters * 2**(i+1),
+                          self.filters * 2**i,
+                          kernel_size=self.kernel_size,
+                          padding=1),
+                nn.BatchNorm2d(self.filters * 2**i),
                 nn.ReLU(),
-                nn.Dropout(p=dropout_rate)
+                nn.Dropout(p=self.dropout_rate)
             ))
-            self.num_channel = filters * 2**i
+            self.num_channel = self.filters * 2**i
         self.out_layer = nn.Sequential(nn.Conv2d(self.num_channel, 1, kernel_size=1), nn.Sigmoid())
 
-    def encoder(self, x, filters=44, num_block=3, kernel_size=3):
+    def encoder(self, x):
         self.num_channel = 3
         self.skip = []
-        for i in range(num_block):
-            self.num_channel = filters * 2**i
+        for i in range(self.num_block):
+            self.num_channel = self.filters * 2**i
             x = eval("self.encoder{}(x)".format(i))
             self.skip.append(x)  # vérifier que la taille est bonne ?
             x = nn.MaxPool2d(2)(x)
 
         return x
 
-    def bottleneck(self, x, filters=44, kernel_size=3):
+    def bottleneck(self, x):
         for i in range(self.depth):
             x = eval("self.bottleneck{}(x)".format(i))
         return x
 
-    def decoder(self, x, filters=44, num_block=3, kernel_size=3):
-        for i in reversed(range(num_block)):
+    def decoder(self, x):
+        for i in reversed(range(self.num_block)):
             x = nn.Upsample(scale_factor=2, mode='nearest')(x)
             x = eval("self.decoder1{}(x)".format(i))
             x = torch.cat((self.skip[i], x), axis=1)  # vérifier que la taille est bonne ?
-            self.num_channel = filters * 2**i
+            self.num_channel = self.filters * 2**i
             x = eval("self.decoder2{}(x)".format(i))
         return x
 
