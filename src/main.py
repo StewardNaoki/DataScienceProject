@@ -94,6 +94,7 @@ def main():
     full_dataset = ImageLoader(csv_file_path=LABEL_FILE_PATH,
                                image_directory=IMAGE_FOLDER_PATH,
                                mask_directory=MASK_FOLDER_PATH,
+                               image_size=args.image_size,
                                transform=data_transforms)
 
     nb_train = int((1.0 - valid_ratio) * len(full_dataset))

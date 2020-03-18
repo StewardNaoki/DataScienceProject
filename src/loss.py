@@ -4,13 +4,15 @@ import torch.nn.functional as F
 import torch.nn.modules.loss
 
 
-def dice_loss(a, b, log = False):
+def dice_loss(a, b, weight=1, log=False):
     a = a.view(a.shape[0], -1)
     b = b.view(a.shape[0], -1)
     # print(torch.sum(a*b))
     # print(torch.sum(a))
     # print(torch.sum(b))
-    score = (2 * torch.sum(a*b) / (torch.sum(a) + torch.sum(b)))
+    intersect = a*b
+    score = (2 * torch.sum(weight * intersect) /
+             (torch.sum(weight * a) + torch.sum(weight * b)))
     if log:
         return - torch.log(score)
     else:
@@ -20,10 +22,13 @@ def dice_loss(a, b, log = False):
 class Custom_loss:
     def __init__(self):
         self.sigmoid = nn.Sigmoid()
+        self.BCE_weight = 0.2
+        self.dice_weight = 1
         # self.f_loss = nn.BCELoss()
-        self.f_loss = nn.BCEWithLogitsLoss()
+        pos_weight = torch.tensor([self.BCE_weight])
+        self.f_loss = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
 
     def __call__(self, inputs, targets):  # voir BCEWithLogitsLoss
-        outputs = self.f_loss(inputs, targets) + dice_loss(inputs, targets)
+        outputs = self.f_loss(inputs, targets) + dice_loss(inputs, targets, self.dice_weight )
         # outputs.backward(retain_graph=True)
         return outputs
