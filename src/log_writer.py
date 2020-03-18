@@ -16,6 +16,9 @@ class LogManager:
         self.raw_run_name = raw_run_name
         self.run_num = 0
         self.example_text = ""
+        self.num_image_train = 0
+        self.num_image_test = 0
+        self.max_image = 10
 
     def set_tensorboard_writer(self, tensorboard_writer):
         self.tensorboard_writer = tensorboard_writer
@@ -53,7 +56,17 @@ class LogManager:
             print("Logging to {}".format(log_file_path))
             f.write(f"{round(time.time(),3)},{round(float(val_acc),2)},{round(float(val_loss),4)},{round(float(train_acc),2)},{round(float(train_loss),4)}\n")
 
-    def tensorboard_send_image(self, index, image_input, mask_target, mask_output, txt=""):
+    def tensorboard_send_image(self, index, image_input, mask_target, mask_output, txt="testing"):
+        if txt == "training":
+            self.num_image_train += 1
+            print("sending image {} {}".format(txt, self.num_image_train))
+        elif txt == "testing":
+            self.num_image_test += 1
+            print("sending image {} {}".format(txt, self.num_image_test))
+        if self.num_image_test > self.max_image:
+            return
+        if self.num_image_test > self.max_image:
+            return
         self.tensorboard_writer.add_image(
             '{}_image/{}'.format(txt, index), image_input, 0)
         self.tensorboard_writer.add_image(

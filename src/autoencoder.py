@@ -22,7 +22,7 @@ class AutoEncoder(nn.Module):
             list_activate.insert(0,nn.BatchNorm2d(self.filters * 2**i))
         if droput:
             list_activate.append(nn.Dropout(p=self.dropout_rate))
-        relu = nn.Sequential(*list_activate)
+        # relu = nn.Sequential(*list_activate)
 
 
         for i in range(num_block):
@@ -212,8 +212,7 @@ def test(model, loader, f_loss, device, log_manager=None, final_test=False, txt 
 
             # send image to tensor board
             # if i == 0 and final_test:
-            if final_test:
-                print("sending image")
+            if final_test and i ==0:
                 log_manager.tensorboard_send_image(
                     i, inputs[0], targets[0], outputs[0], txt = txt)
 

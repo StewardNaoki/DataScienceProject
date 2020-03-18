@@ -2,7 +2,7 @@ set -e
 num_epoch=1
 num_batch=1
 num_thread=1
-image_size=128
+image_size=64
 
 num_depth=2
 num_block=2

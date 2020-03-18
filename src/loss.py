@@ -26,7 +26,8 @@ class Custom_loss:
         self.dice_weight = 1
         # self.f_loss = nn.BCELoss()
         pos_weight = torch.tensor([self.BCE_weight])
-        self.f_loss = nn.BCEWithLogitsLoss(pos_weight=pos_weight).cuda()
+        # self.f_loss = nn.BCEWithLogitsLoss(pos_weight=pos_weight).cuda()
+        self.f_loss = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
 
     def __call__(self, inputs, targets):  # voir BCEWithLogitsLoss
         outputs = self.f_loss(inputs, targets) + dice_loss(self.sigmoid(inputs), targets, self.dice_weight )
