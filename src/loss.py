@@ -14,7 +14,7 @@ def dice_loss(a, b, weight=1, log=False):
     score = (2 * torch.sum(weight * intersect) /
              (torch.sum(weight * a) + torch.sum(weight * b)))
     if log:
-        return - torch.log(score)
+        return -torch.log(score)
     else:
         return 1 - score
 
@@ -26,7 +26,7 @@ class Custom_loss:
         self.dice_weight = 1
         # self.f_loss = nn.BCELoss()
         pos_weight = torch.tensor([self.BCE_weight])
-        self.f_loss = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
+        self.f_loss = nn.BCEWithLogitsLoss(pos_weight=pos_weight).cuda()
 
     def __call__(self, inputs, targets):  # voir BCEWithLogitsLoss
         outputs = self.f_loss(inputs, targets) + dice_loss(inputs, targets, self.dice_weight )

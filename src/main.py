@@ -17,6 +17,7 @@ from autoencoder import AutoEncoder, train, test
 from image_loader import ImageLoader, ToTensor, Normalize
 import loss as loss
 
+DATASET_SIZE = 21685
 CREATE_CSV = True
 DATA_PATH = "./../DATA/"
 CSV_NAME = "train_label.csv"
@@ -58,6 +59,8 @@ def progress(loss, acc):
 
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument("--dataset_ratio", type=float, default=1,
+                        help="the purcentage of data used in the dataset (default: 1)")
     parser.add_argument("--image_size", type=int, default=512,
                         help="size of the input image (default: 512)")
     parser.add_argument("--depth", type=int, default=6,
@@ -94,6 +97,7 @@ def main():
     full_dataset = ImageLoader(csv_file_path=LABEL_FILE_PATH,
                                image_directory=IMAGE_FOLDER_PATH,
                                mask_directory=MASK_FOLDER_PATH,
+                               dataset_size=int(args.dataset_ratio*DATASET_SIZE),
                                image_size=args.image_size,
                                transform=data_transforms)
 
@@ -118,8 +122,7 @@ def main():
     # TODO params
     # num_param = args.num_var + args.num_const + (args.num_var*args.num_const)
     model = AutoEncoder(num_block=args.num_block, depth=args.depth)
-    print("model size:", sys.getsizeof(model))
-    print("Network architechture:\n", model)
+    # print("Network architechture:\n", model)
 
     use_gpu = torch.cuda.is_available()
     if use_gpu:

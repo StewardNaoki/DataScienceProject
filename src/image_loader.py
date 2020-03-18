@@ -20,7 +20,7 @@ EXTENTION_JPG = ".jpg"
 class ImageLoader(Dataset):
     """Face Landmarks dataset."""
 
-    def __init__(self, csv_file_path, image_directory, mask_directory, image_size = 512, transform=None):
+    def __init__(self, csv_file_path, image_directory, mask_directory, dataset_size, image_size=512, transform=None):
         """
         Args:
             csv_file (string): Path to the csv file with annotations.
@@ -28,7 +28,7 @@ class ImageLoader(Dataset):
             transform (callable, optional): Optional transform to be applied
                 on a sample.
         """
-        self.data_frame = pd.read_csv(csv_file_path).head(10)
+        self.data_frame = pd.read_csv(csv_file_path).head(dataset_size)
         self.transform = transform
         self.image_directory = image_directory
         self.mask_directory = mask_directory
@@ -55,26 +55,19 @@ class ImageLoader(Dataset):
 
     def __getitem__(self, idx):
         img_name = os.path.join(
-            self.image_directory, self.data_frame["img"].iloc[idx] + EXTENTION_JPG)
+            self.image_directory,
+            self.data_frame["img"].iloc[idx] + EXTENTION_JPG)
         image = cv2.imread(img_name, cv2.IMREAD_COLOR)
-        image = cv2.resize(image, (self.IMG_SIZE, self.IMG_SIZE))
-        assert (image is not None), "This image is None: image name: {}".format(
-            img_name)
+        assert (image is not None), "This image is None: image name: {}".format(img_name)
+        # image = cv2.resize(image, (self.IMG_SIZE, self.IMG_SIZE))
 
         mask_name = os.path.join(
-            self.mask_directory, self.data_frame["img"].iloc[idx] + EXTENTION_PNG)
+            self.mask_directory,
+            self.data_frame["img"].iloc[idx] + EXTENTION_PNG)
         mask = cv2.imread(mask_name, cv2.IMREAD_GRAYSCALE)
-
-        assert (mask is not None), "This image is None: image name: {}".format(
-            mask_name)
+        assert (mask is not None), "This image is None: image name: {}".format(mask_name)
         # mask = cv2.resize(mask, (self.IMG_SIZE, self.IMG_SIZE))
-        mask = cv2.resize(mask, (self.IMG_SIZE, self.IMG_SIZE))
-        # print("mask ", mask)
-        # print("image ", image)
-        # print(np.max(mask))
-        # assert(False)
-        # print(image.shape)
-        # print(mask.shape)
+
         image, mask = self.random_transform(image, mask)
 
         sample = {'image': np.array(image), 'mask': np.array(mask)}
@@ -82,7 +75,6 @@ class ImageLoader(Dataset):
         if self.transform:
             sample = self.transform(sample)
 
-        # return sample
         return (sample['image'], sample['mask'])
 
 
