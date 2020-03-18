@@ -23,14 +23,14 @@ class AutoEncoder(nn.Module):
                           self.filters * 2**i,
                           kernel_size=self.kernel_size,
                           padding=1),
-                nn.BatchNorm2d(self.filters * 2**i),
+                # nn.BatchNorm2d(self.filters * 2**i),
                 nn.ReLU(),
                 nn.Dropout(p=self.dropout_rate),
                 nn.Conv2d(self.filters * 2**i,
                           self.filters * 2**i,
                           kernel_size=self.kernel_size,
                           padding=1),
-                nn.BatchNorm2d(self.filters * 2**i),
+                # nn.BatchNorm2d(self.filters * 2**i),
                 nn.ReLU(),
                 nn.Dropout(p=self.dropout_rate)
             ))
@@ -52,7 +52,7 @@ class AutoEncoder(nn.Module):
                           self.filters * 2**i,
                           kernel_size=self.kernel_size,
                           padding=1),
-                nn.BatchNorm2d(self.filters * 2**i),
+                # nn.BatchNorm2d(self.filters * 2**i),
                 nn.ReLU(),
                 nn.Dropout(p=self.dropout_rate)
             ))
@@ -61,7 +61,7 @@ class AutoEncoder(nn.Module):
                           self.filters * 2**i,
                           kernel_size=self.kernel_size,
                           padding=1),
-                nn.BatchNorm2d(self.filters * 2**i),
+                # nn.BatchNorm2d(self.filters * 2**i),
                 nn.ReLU(),
                 nn.Dropout(p=self.dropout_rate)
             ))
