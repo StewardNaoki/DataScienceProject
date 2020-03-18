@@ -23,16 +23,16 @@ class AutoEncoder(nn.Module):
                           self.filters * 2**i,
                           kernel_size=self.kernel_size,
                           padding=1),
-                nn.BatchNorm2d(self.filters * 2**i),
+                # nn.BatchNorm2d(self.filters * 2**i),
                 nn.ReLU(),
-                nn.Dropout(p=self.dropout_rate),
+                # nn.Dropout(p=self.dropout_rate),
                 nn.Conv2d(self.filters * 2**i,
                           self.filters * 2**i,
                           kernel_size=self.kernel_size,
                           padding=1),
-                nn.BatchNorm2d(self.filters * 2**i),
-                nn.ReLU(),
-                nn.Dropout(p=self.dropout_rate)
+                # nn.BatchNorm2d(self.filters * 2**i),
+                nn.ReLU()
+                # nn.Dropout(p=self.dropout_rate)
             ))
             self.num_channel = self.filters * 2**i
 
@@ -52,18 +52,18 @@ class AutoEncoder(nn.Module):
                           self.filters * 2**i,
                           kernel_size=self.kernel_size,
                           padding=1),
-                nn.BatchNorm2d(self.filters * 2**i),
-                nn.ReLU(),
-                nn.Dropout(p=self.dropout_rate)
+                # nn.BatchNorm2d(self.filters * 2**i),
+                nn.ReLU()
+                # nn.Dropout(p=self.dropout_rate)
             ))
             setattr(self, 'decoder2{}'.format(i), nn.Sequential(
                 nn.Conv2d(self.filters * 2**(i+1),
                           self.filters * 2**i,
                           kernel_size=self.kernel_size,
                           padding=1),
-                nn.BatchNorm2d(self.filters * 2**i),
-                nn.ReLU(),
-                nn.Dropout(p=self.dropout_rate)
+                # nn.BatchNorm2d(self.filters * 2**i),
+                nn.ReLU()
+                # nn.Dropout(p=self.dropout_rate)
             ))
             self.num_channel = self.filters * 2**i
         self.out_layer = nn.Sequential(
@@ -92,6 +92,7 @@ class AutoEncoder(nn.Module):
     def decoder(self, x):
         for i in reversed(range(self.num_block)):
             x = nn.Upsample(scale_factor=2, mode='nearest')(x)
+            # x = nn.ConvTranspose2d(in_channels = self.num_channel, out_channels = self.num_channel, stride=2, kernel_size = 3, padding= 1, output_padding=1)(x)
             x = eval("self.decoder1{}(x)".format(i))
             # vérifier que la taille est bonne ?
             x = torch.cat((self.skip[i], x), axis=1)

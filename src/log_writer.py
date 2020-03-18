@@ -2,6 +2,7 @@ import time
 import matplotlib.pyplot as plt
 from matplotlib import style
 import os
+import sys
 
 style.use("ggplot")
 
@@ -59,6 +60,32 @@ class LogManager:
             '{}_mask_target/{}'.format(txt, index), mask_target, 0)
         self.tensorboard_writer.add_image(
             '{}_mask_output/{}'.format(txt, index), mask_output, 0)
+
+    def summary_writer(self, model, optimizer):
+
+        summary_file = open(self.run_dir_path + "/summary.txt", 'w')
+
+        summary_text = """
+RUN Number: {}
+===============
+
+Executed command
+================
+{}
+
+Model summary
+=============
+{}
+
+
+{} trainable parameters
+
+Optimizer
+========
+{}
+""".format(self.run_num, " ".join(sys.argv), model, sum(p.numel() for p in model.parameters() if p.requires_grad), optimizer)
+        summary_file.write(summary_text)
+        summary_file.close()
 
 
 # def generate_unique_run_dir(logdir, raw_run_name):

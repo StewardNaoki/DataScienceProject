@@ -157,6 +157,7 @@ def main():
         tensorboard_writer = SummaryWriter(
             log_dir=run_dir_path, filename_suffix=".log")
         LogManager.set_tensorboard_writer(tensorboard_writer)
+        LogManager.summary_writer(model, optimizer)
 
         # write short description of the run
         run_desc = "Epoch{}".format(args.epoch)
@@ -186,7 +187,7 @@ def main():
             progress(train_loss, train_acc)
             # time.sleep(0.5)
 
-            val_loss, val_acc = test(model, test_loader, f_loss, device, LogManager, False)
+            val_loss, val_acc = test(model, test_loader, f_loss, device, log_manager=LogManager)
             print(" Validation : Loss : {:.4f}, Acc : {:.4f}".format(val_loss, val_acc))
 
             model_checkpoint.update(val_loss)
@@ -218,8 +219,8 @@ def main():
         test_loader,
         f_loss,
         device,
-        final_test=True,
-        log_manager=LogManager)
+        log_manager=LogManager,
+        final_test=True)
 
     print(" Test       : Loss : {:.4f}, Acc : {:.4f}".format(
         test_loss, test_acc))
