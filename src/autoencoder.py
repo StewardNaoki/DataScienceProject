@@ -6,7 +6,7 @@ import sys
 
 class AutoEncoder(nn.Module):
 
-    def __init__(self, num_block, depth):
+    def __init__(self, num_block, depth, droput = False, batch_norm = False, conv_transpose = False):
         super().__init__()
         self.num_block = num_block
         self.num_channel = 3
@@ -16,6 +16,14 @@ class AutoEncoder(nn.Module):
         self.kernel_size = 3
         self.depth = depth
         self.dropout_rate = 0.2
+        
+        list_activate = [nn.ReLU()]
+        if batch_norm:
+            list_activate.insert(0,nn.BatchNorm2d(self.filters * 2**i))
+        if droput:
+            list_activate.append(nn.Dropout(p=self.dropout_rate))
+        relu = nn.Sequential(*list_activate)
+            
 
         for i in range(num_block):
             setattr(self, 'encoder{}'.format(i), nn.Sequential(
@@ -42,8 +50,8 @@ class AutoEncoder(nn.Module):
                           self.num_channel,
                           kernel_size=self.kernel_size,
                           padding=1),
-                nn.ReLU()
-                # nn.BatchNorm2d(self.num_channel)
+                nn.ReLU(),
+                nn.BatchNorm2d(self.num_channel)
             ))
 
         for i in reversed(range(num_block)):
@@ -66,11 +74,16 @@ class AutoEncoder(nn.Module):
                 nn.Dropout(p=self.dropout_rate)
             ))
             self.num_channel = self.filters * 2**i
+        # self.out_layer = nn.Sequential(
+        #     nn.Conv2d(self.num_channel,
+        #               1,
+        #               kernel_size=1),
+        #     nn.Sigmoid())
         self.out_layer = nn.Sequential(
             nn.Conv2d(self.num_channel,
                       1,
-                      kernel_size=1),
-            nn.Sigmoid())
+                      kernel_size=1)
+            )
 
     def encoder(self, x):
         self.num_channel = 3
@@ -91,7 +104,8 @@ class AutoEncoder(nn.Module):
 
     def decoder(self, x):
         for i in reversed(range(self.num_block)):
-            x = nn.Upsample(scale_factor=2, mode='nearest')(x)
+            # x = nn.Upsample(scale_factor=2, mode='nearest')(x)
+            x = nn.ConvTranspose2d(in_channels = self.num_channel, out_channels = self.num_channel, stride=2, kernel_size = 3, padding= 1, output_padding=1)(x)
             x = eval("self.decoder1{}(x)".format(i))
             # vérifier que la taille est bonne ?
             x = torch.cat((self.skip[i], x), axis=1)

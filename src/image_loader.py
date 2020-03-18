@@ -20,7 +20,7 @@ EXTENTION_JPG = ".jpg"
 class ImageLoader(Dataset):
     """Face Landmarks dataset."""
 
-    def __init__(self, csv_file_path, image_directory, mask_directory, transform=None):
+    def __init__(self, csv_file_path, image_directory, mask_directory, image_size = 512, transform=None):
         """
         Args:
             csv_file (string): Path to the csv file with annotations.
@@ -28,11 +28,11 @@ class ImageLoader(Dataset):
             transform (callable, optional): Optional transform to be applied
                 on a sample.
         """
-        self.data_frame = pd.read_csv(csv_file_path)
+        self.data_frame = pd.read_csv(csv_file_path).head(10)
         self.transform = transform
         self.image_directory = image_directory
         self.mask_directory = mask_directory
-        self.IMG_SIZE = 512
+        self.IMG_SIZE = image_size
 
     def __len__(self):
         return len(self.data_frame)
