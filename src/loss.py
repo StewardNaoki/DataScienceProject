@@ -29,6 +29,6 @@ class Custom_loss:
         self.f_loss = nn.BCEWithLogitsLoss(pos_weight=pos_weight).cuda()
 
     def __call__(self, inputs, targets):  # voir BCEWithLogitsLoss
-        outputs = self.f_loss(inputs, targets) + dice_loss(inputs, targets, self.dice_weight )
+        outputs = self.f_loss(inputs, targets) + dice_loss(self.sigmoid(inputs), targets, self.dice_weight )
         # outputs.backward(retain_graph=True)
         return outputs

@@ -59,7 +59,7 @@ def generate(num_run)
         code = ' '.join(str(e) for e in utils.rle_encode(output))
         data_submission.loc[idx] = [data_frame["img"].iloc[idx]] + [code]
         # assert(False)
-    data_submission.to_csv(DATA_PATH + 'submission.csv', index=False)
+    data_submission.to_csv(DATA_PATH + 'submission{}.csv'.format(num_run), index=False)
     # a = torch.tensor([[1,2],[1,4]])
     # a = a.numpy()
     # print(type(a))
